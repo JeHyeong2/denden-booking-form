@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>든든피플 예약 신청</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+    background: #f5f7fa; color: #222; font-size: 16px;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  .subtitle { color: #666; font-size: 13px; margin-bottom: 24px; }
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+  label .required { color: #e74c3c; margin-left: 2px; }
+  input[type="text"], input[type="tel"], input[type="date"], input[type="number"],
+  textarea, select {
+    width: 100%; padding: 12px; border: 1px solid #d0d7de; border-radius: 8px;
+    font-size: 16px; font-family: inherit; background: #fff;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  input[readonly] { background: #f5f7fa; color: #555; cursor: not-allowed; }
+  textarea { min-height: 72px; resize: vertical; }
+  .hint { color: #888; font-size: 12px; margin-top: 4px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .addr-row { display: flex; gap: 8px; }
+  .addr-row input { flex: 1; }
+  .btn-search {
+    padding: 0 16px; border: 1px solid #3b82f6; background: #fff;
+    color: #3b82f6; border-radius: 8px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; font-size: 14px;
+  }
+  .btn-search:hover { background: #3b82f6; color: #fff; }
+  .consent {
+    display: flex; align-items: flex-start; gap: 8px; padding: 12px;
+    background: #f0f4f9; border-radius: 8px; font-size: 13px; color: #555;
+    margin: 16px 0;
+  }
+  .consent input { margin-top: 2px; }
+  button[type="submit"] {
+    width: 100%; padding: 14px; border: 0; border-radius: 8px;
+    background: #3b82f6; color: #fff; font-size: 17px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  button[type="submit"]:hover:not(:disabled) { background: #2563eb; }
+  button[type="submit"]:disabled { background: #aaa; cursor: not-allowed; }
+  .result {
+    display: none; padding: 16px; border-radius: 8px; margin-top: 16px;
+    font-size: 14px; text-align: center;
+  }
+  .result.success { display: block; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .result.error { display: block; background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+  .kakao-badge {
+    display: inline-block; background: #fee500; color: #3c1e1e;
+    padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
+    margin-left: 6px; vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>예약 신청 <span id="kakaoBadge" class="kakao-badge" style="display:none;">카톡 연결됨</span></h1>
+  <p class="subtitle">아래 양식을 작성해주시면 매니저 매칭 후 입력하신 연락처로 안내드립니다.</p>
+
+  <form id="bookingForm">
+    <div class="form-group">
+      <label>상호명<span class="required">*</span></label>
+      <input type="text" name="business_name" required maxlength="100" placeholder="예: 강남식당">
+    </div>
+
+    <div class="form-group">
+      <label>주소<span class="required">*</span></label>
+      <div class="addr-row" style="margin-bottom:8px;">
+        <input type="text" id="postcode" placeholder="우편번호" readonly>
+        <button type="button" class="btn-search" id="btnSearchAddr">주소 검색</button>
+      </div>
+      <input type="text" id="addressRoad" placeholder="도로명/지번 주소" readonly required style="margin-bottom:8px;">
+      <input type="text" id="addressDetail" placeholder="상세주소 (예: 3층 또는 101호)" maxlength="100">
+      <input type="hidden" name="address" id="addressCombined">
+    </div>
+
+    <div class="form-group">
+      <label>날짜<span class="required">*</span></label>
+      <input type="date" name="booking_date" id="bookingDate" required>
+      <p class="hint">예약 희망일을 선택해주세요</p>
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>시작 시간<span class="required">*</span></label>
+        <select id="startTime" required>
+          <option value="">선택...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>종료 시간<span class="required">*</span></label>
+        <select id="endTime" required>
+          <option value="">선택...</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint" id="timeHint" style="margin-top:-10px; margin-bottom:18px;"></p>
+    <input type="hidden" name="booking_time" id="bookingTimeCombined">
+
+    <div class="row">
+      <div class="form-group">
+        <label>인원<span class="required">*</span></label>
+        <input type="number" name="headcount" required min="1" max="50" value="1">
+      </div>
+      <div class="form-group">
+        <label>업무<span class="required">*</span></label>
+        <select name="work_type" required>
+          <option value="">선택...</option>
+          <option>홀서빙</option>
+          <option>주방보조</option>
+          <option>설거지</option>
+          <option>청소</option>
+          <option>정리수납</option>
+          <option>이사</option>
+          <option>기타</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>특이사항</label>
+      <textarea name="special_notes" maxlength="500" placeholder="없으면 비워두세요"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>신청자 성함<span class="required">*</span></label>
+      <input type="text" name="sender_name" required maxlength="50">
+    </div>
+
+    <div class="form-group">
+      <label>신청자 연락처<span class="required">*</span></label>
+      <input type="tel" name="sender_contact" required pattern="^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$" placeholder="010-1234-5678">
+      <p class="hint">매니저 매칭 후 이 번호로 연락드립니다.</p>
+    </div>
+
+    <input type="hidden" name="sender_kakao_id" id="senderKakaoId">
+
+    <div class="consent">
+      <input type="checkbox" id="consent" required>
+      <label for="consent" style="margin:0; font-weight:normal;">
+        개인정보(이름, 연락처)를 매칭 안내 목적으로 수집·이용에 동의합니다.
+      </label>
+    </div>
+
+    <button type="submit" id="submitBtn">신청하기</button>
+  </form>
+
+  <div id="result" class="result"></div>
+</div>
+
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+  // ─── URL query에서 kakao user key 추출 ───
+  const params = new URLSearchParams(location.search);
+  const kakaoKey = params.get('k');
+  if (kakaoKey) {
+    document.getElementById('senderKakaoId').value = kakaoKey;
+    document.getElementById('kakaoBadge').style.display = 'inline-block';
+  }
+
+  // ─── 날짜 기본값: 내일 + 최소: 오늘 ───
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 86400000);
+  const fmt = d => d.toISOString().slice(0, 10);
+  document.getElementById('bookingDate').min = fmt(today);
+  document.getElementById('bookingDate').value = fmt(tomorrow);
+
+  // ─── 시간 드롭다운 옵션 생성 (06:00 ~ 24:00, 30분 단위) ───
+  function timeOptions(fromHour, toHour) {
+    const list = [];
+    for (let h = fromHour; h <= toHour; h++) {
+      for (const m of [0, 30]) {
+        if (h === toHour && m === 30) continue;
+        list.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+      }
+    }
+    return list;
+  }
+  const startSel = document.getElementById('startTime');
+  const endSel = document.getElementById('endTime');
+  // 시작: 06:00 ~ 22:00
+  timeOptions(6, 22).forEach(v => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = v;
+    startSel.appendChild(opt);
+  });
+  // 종료: 07:00 ~ 24:00
+  timeOptions(7, 24).forEach(v => {
+    const opt = document.createElement('option'); opt.value = v; opt.textContent = (v === '24:00' ? '24:00 (자정)' : v);
+    opt.value = v;
+    endSel.appendChild(opt);
+  });
+
+  // ─── 시작/종료 시간 → booking_time 합치기 + 검증 ───
+  const timeHidden = document.getElementById('bookingTimeCombined');
+  const timeHint = document.getElementById('timeHint');
+  function toMin(t) { const [h,m] = t.split(':').map(Number); return h*60 + m; }
+  function updateTime() {
+    const start = startSel.value;
+    const end = endSel.value;
+    if (!start || !end) { timeHidden.value = ''; timeHint.textContent = ''; return; }
+    if (toMin(end) <= toMin(start)) {
+      timeHidden.value = '';
+      timeHint.textContent = '⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.';
+      timeHint.style.color = '#c62828';
+      return;
+    }
+    timeHidden.value = `${start}~${end}`;
+    const diff = (toMin(end) - toMin(start)) / 60;
+    timeHint.textContent = `총 ${diff}시간`;
+    timeHint.style.color = '#888';
+  }
+  startSel.addEventListener('change', updateTime);
+  endSel.addEventListener('change', updateTime);
+
+  // ─── 주소 (Daum 우편번호) ───
+  const addrCombined = document.getElementById('addressCombined');
+  const addrRoad = document.getElementById('addressRoad');
+  const addrDetail = document.getElementById('addressDetail');
+  function syncAddress() {
+    addrCombined.value = (addrRoad.value + ' ' + addrDetail.value).trim();
+  }
+  document.getElementById('btnSearchAddr').addEventListener('click', () => {
+    new daum.Postcode({
+      oncomplete: function(data) {
+        document.getElementById('postcode').value = data.zonecode;
+        addrRoad.value = data.roadAddress || data.jibunAddress;
+        syncAddress();
+        addrDetail.focus();
+      }
+    }).open();
+  });
+  addrDetail.addEventListener('input', syncAddress);
+
+  // ─── 폼 제출 ───
+  // GitHub Pages에서 호스팅되면 location.origin이 github.io라 webhook으로 안 감.
+  // 기본값을 cloudflared로 hardcoded. ?api=... 쿼리로 override 가능 (운영 도메인 변경 시).
+  const DEFAULT_API = 'https://christmas-phd-findarticles-principles.trycloudflare.com/webhook/web-form-booking';
+  const apiUrl = params.get('api') || (
+    location.hostname === 'localhost' ? location.origin + '/webhook/web-form-booking' : DEFAULT_API
+  );
+  const form = document.getElementById('bookingForm');
+  const btn = document.getElementById('submitBtn');
+  const result = document.getElementById('result');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // 주소·시간 hidden 동기화 보증
+    syncAddress();
+    updateTime();
+    if (!addrCombined.value) { alert('주소를 검색해주세요.'); return; }
+    if (!timeHidden.value) { alert('시작/종료 시간을 올바르게 선택해주세요.'); return; }
+
+    btn.disabled = true; btn.textContent = '접수 중...';
+    result.className = 'result'; result.textContent = '';
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    if (!data.sender_kakao_id) delete data.sender_kakao_id;
+
+    try {
+      const r = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await r.json();
+      if (r.ok && json.booking_id) {
+        result.className = 'result success';
+        result.innerHTML = `<strong>접수 완료</strong><br>접수번호 #${json.short_id || json.booking_id.substring(0,8)}<br>${json.message || '곧 안내드리겠습니다.'}`;
+        form.style.display = 'none';
+      } else {
+        throw new Error(json.message || 'submit failed');
+      }
+    } catch (err) {
+      result.className = 'result error';
+      result.textContent = '접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. (' + err.message + ')';
+      btn.disabled = false; btn.textContent = '신청하기';
+    }
+  });
+</script>
+</body>
+</html>
