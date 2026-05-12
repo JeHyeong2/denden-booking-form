@@ -91,6 +91,32 @@
     border-radius: 50%;
   }
 
+  /* prefill notice */
+  .prefill-notice {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .prefill-notice.show { display: flex; }
+  .prefill-notice button {
+    background: transparent;
+    border: 0;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+
   /* ─── 카드 / 섹션 ─── */
   .card {
     background: #fff;
@@ -348,6 +374,11 @@
     <div id="kakaoBadge" class="kakao-badge" style="display:none;">카카오톡 연결됨</div>
   </header>
 
+  <div id="prefillNotice" class="prefill-notice">
+    <span>💾 이전에 입력하신 정보를 불러왔습니다</span>
+    <button type="button" id="btnClearPrefill">초기화</button>
+  </div>
+
   <form id="bookingForm" novalidate>
 
     <!-- 사업장 정보 -->
@@ -470,6 +501,20 @@
     document.getElementById('kakaoBadge').style.display = 'inline-flex';
   }
 
+  // ─── localStorage 자동완성 (같은 기기/브라우저에서 재방문 시) ───
+  // 카카오 ID 있으면 ID별로 분리, 없으면 default 키
+  const STORAGE_KEY = 'denden_booking_form:' + (kakaoKey || '_default');
+  function loadCached() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+    catch { return {}; }
+  }
+  function saveCached(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+  }
+  function clearCached() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  }
+
   // ─── 날짜 (Flatpickr) ───
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 86400000);
@@ -551,6 +596,30 @@
   });
   addrDetail.addEventListener('input', syncAddress);
 
+  // ─── 캐시 prefill (모든 요소 만들어진 후 실행) ───
+  const cached = loadCached();
+  const hasCached = Object.keys(cached).length > 0;
+  if (hasCached) {
+    if (cached.business_name) document.querySelector('[name="business_name"]').value = cached.business_name;
+    if (cached.postcode) document.getElementById('postcode').value = cached.postcode;
+    if (cached.address_road) addrRoad.value = cached.address_road;
+    if (cached.address_detail) addrDetail.value = cached.address_detail;
+    syncAddress();
+    if (cached.sender_name) document.querySelector('[name="sender_name"]').value = cached.sender_name;
+    if (cached.sender_contact) document.querySelector('[name="sender_contact"]').value = cached.sender_contact;
+    if (cached.work_type) document.querySelector('[name="work_type"]').value = cached.work_type;
+    if (cached.headcount) document.querySelector('[name="headcount"]').value = cached.headcount;
+    if (cached.start_time) startSel.value = cached.start_time;
+    if (cached.end_time) endSel.value = cached.end_time;
+    updateTime();
+    document.getElementById('prefillNotice').classList.add('show');
+  }
+  document.getElementById('btnClearPrefill').addEventListener('click', () => {
+    if (!confirm('저장된 자동완성 정보를 모두 지울까요?')) return;
+    clearCached();
+    location.reload();
+  });
+
   // ─── 폼 제출 ───
   const DEFAULT_API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
   const apiUrl = params.get('api') || (
@@ -583,6 +652,20 @@
       });
       const json = await r.json();
       if (r.ok && json.booking_id) {
+        // 제출 성공 시 입력 값들을 다음 방문 prefill용으로 캐싱
+        saveCached({
+          business_name: data.business_name,
+          postcode: document.getElementById('postcode').value,
+          address_road: addrRoad.value,
+          address_detail: addrDetail.value,
+          sender_name: data.sender_name,
+          sender_contact: data.sender_contact,
+          work_type: data.work_type,
+          headcount: data.headcount,
+          start_time: startSel.value,
+          end_time: endSel.value,
+        });
+
         result.className = 'result success';
         result.innerHTML = `
           <div class="check">✓</div>
@@ -591,6 +674,7 @@
           <p>${json.message || '곧 안내드리겠습니다.'}</p>
         `;
         form.style.display = 'none';
+        document.getElementById('prefillNotice').classList.remove('show');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         throw new Error(json.message || 'submit failed');
