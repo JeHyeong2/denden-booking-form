@@ -964,8 +964,13 @@
     consentEl.addEventListener(evt, () => setTimeout(syncSubmitState, 0))
   );
   consentEl.closest('.consent')?.addEventListener('click', () => setTimeout(syncSubmitState, 0));
+  // 폼 전체에서 어떤 input 변경이든 sync (보수적 fallback)
+  document.getElementById('bookingForm').addEventListener('change', syncSubmitState);
+  document.getElementById('bookingForm').addEventListener('input', syncSubmitState);
+  // 최후의 fallback — 300ms polling. 어떤 이벤트도 못 잡아도 보장
+  setInterval(syncSubmitState, 300);
   syncSubmitState();
-  console.log('[consent] initial state:', consentEl.checked, 'locked:', submitBtnEl.classList.contains('is-locked'));
+  console.log('[consent] init checked=', consentEl.checked, 'locked=', submitBtnEl.classList.contains('is-locked'));
 
   // ─── 폼 제출 ───
   const DEFAULT_API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
