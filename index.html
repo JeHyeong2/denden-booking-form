@@ -961,7 +961,9 @@
   if (hasAnyCache) document.getElementById('prefillNotice').classList.add('show');
 
   // ─── 카카오 ID 기반 backend history prefill (다른 기기 자동완성) ───
-  const HISTORY_API = (params.get('historyApi')) || DEFAULT_API.replace('/web-form-booking', '/booking-history');
+  // DEFAULT_API는 폼 제출 섹션에서 const로 선언되지만 hoisting 안 되므로 직접 base URL 사용
+  const API_BASE_FOR_HISTORY = 'https://plants-believes-kent-cruises.trycloudflare.com';
+  const HISTORY_API = (params.get('historyApi')) || (API_BASE_FOR_HISTORY + '/webhook/booking-history');
   async function fetchAndMergeHistory() {
     if (!kakaoKey) { console.log('[history] no kakao key in URL'); return; }
     console.log('[history] fetching', HISTORY_API, 'k=', kakaoKey);
