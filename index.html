@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#1f6feb">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>든든피플 예약 신청</title>
 
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -314,11 +317,24 @@
   .consent {
     display: flex; gap: 12px; padding: 16px;
     background: var(--gray-50); border-radius: var(--radius-sm);
-    border: 1px solid var(--gray-200); margin-bottom: 16px;
+    border: 1.5px solid var(--gray-200); margin-bottom: 16px;
     font-size: 13px; color: var(--gray-700); cursor: pointer;
+    transition: all 0.18s;
   }
   .consent input[type="checkbox"] { margin: 0; width: 20px; height: 20px; accent-color: var(--primary); flex-shrink: 0; }
   .consent label { margin: 0; font-weight: 500; cursor: pointer; line-height: 1.45; }
+  .consent.invalid {
+    background: var(--red-light);
+    border-color: var(--red);
+    color: #991b1b;
+    animation: shake 0.32s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
 
   .submit-btn {
     width: 100%; padding: 16px; border: 0; border-radius: var(--radius);
@@ -838,11 +854,14 @@
   // ─── 카카오 ID 기반 backend history prefill (다른 기기 자동완성) ───
   const HISTORY_API = (params.get('historyApi')) || DEFAULT_API.replace('/web-form-booking', '/booking-history');
   async function fetchAndMergeHistory() {
-    if (!kakaoKey) return;
+    if (!kakaoKey) { console.log('[history] no kakao key in URL'); return; }
+    console.log('[history] fetching', HISTORY_API, 'k=', kakaoKey);
     try {
-      const r = await fetch(HISTORY_API + '?k=' + encodeURIComponent(kakaoKey), { method: 'GET' });
+      const r = await fetch(HISTORY_API + '?k=' + encodeURIComponent(kakaoKey), { method: 'GET', cache: 'no-store' });
+      console.log('[history] response', r.status);
       if (!r.ok) return;
       const data = await r.json();
+      console.log('[history] data', data);
       const remoteList = (data.businesses || []);
       if (remoteList.length === 0) return;
       // local과 merge (id 없는 항목 보강 + 같은 (business_name, address_road) 중복 제거)
@@ -933,7 +952,18 @@
     syncAddress();
     if (!addrCombined.value) { alert('주소를 검색해주세요.'); return; }
     if (scheduleData.length === 0) { alert('달력에서 예약 날짜를 1개 이상 선택해주세요.'); return; }
-    if (!document.getElementById('consent').checked) { alert('개인정보 수집·이용에 동의해주세요.'); return; }
+    const consentEl = document.getElementById('consent');
+    const consentBox = consentEl.closest('.consent');
+    if (!consentEl.checked) {
+      consentBox.classList.add('invalid');
+      consentBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => consentBox.classList.remove('invalid'), 1200);
+      // 약관 강조 후 1.5초 대기 → 그래도 alert 띄움
+      setTimeout(() => alert('개인정보 수집·이용에 동의해주세요.'), 350);
+      return;
+    }
+    // 약관 체크된 상태면 invalid 클래스 제거
+    consentBox.classList.remove('invalid');
 
     btn.disabled = true; btn.textContent = '접수 중...';
     result.className = 'result'; result.innerHTML = '';
