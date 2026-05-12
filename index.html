@@ -835,6 +835,60 @@
   const hasAnyCache = (cached.businesses || []).length > 0 || cached.sender_name;
   if (hasAnyCache) document.getElementById('prefillNotice').classList.add('show');
 
+  // ─── 카카오 ID 기반 backend history prefill (다른 기기 자동완성) ───
+  const HISTORY_API = (params.get('historyApi')) || DEFAULT_API.replace('/web-form-booking', '/booking-history');
+  async function fetchAndMergeHistory() {
+    if (!kakaoKey) return;
+    try {
+      const r = await fetch(HISTORY_API + '?k=' + encodeURIComponent(kakaoKey), { method: 'GET' });
+      if (!r.ok) return;
+      const data = await r.json();
+      const remoteList = (data.businesses || []);
+      if (remoteList.length === 0) return;
+      // local과 merge (id 없는 항목 보강 + 같은 (business_name, address_road) 중복 제거)
+      const local = loadCached();
+      local.businesses = local.businesses || [];
+      let touched = false;
+      for (const rb of remoteList) {
+        const sameKey = (a, b) =>
+          (a.business_name || '') === (b.business_name || '') &&
+          (a.address_road || a.address || '') === (b.address_road || b.address || '');
+        const existing = local.businesses.find(lb => sameKey(lb, rb));
+        if (existing) {
+          // last_used 더 최신이면 갱신
+          if ((rb.last_used || '') > (existing.last_used || '')) {
+            Object.assign(existing, {
+              business_name: rb.business_name,
+              postcode: rb.postcode,
+              address_road: rb.address_road || rb.address,
+              address_detail: rb.address_detail || '',
+              last_used: rb.last_used,
+            });
+            touched = true;
+          }
+        } else {
+          local.businesses.push({
+            id: _uuid(),
+            business_name: rb.business_name,
+            postcode: rb.postcode,
+            address_road: rb.address_road || rb.address,
+            address_detail: rb.address_detail || '',
+            last_used: rb.last_used,
+          });
+          touched = true;
+        }
+      }
+      if (touched) {
+        local.businesses.sort((a, b) => (b.last_used || '').localeCompare(a.last_used || ''));
+        local.businesses = local.businesses.slice(0, MAX_BUSINESSES);
+        _writeCached(local);
+        renderSavedBiz();
+        document.getElementById('prefillNotice').classList.add('show');
+      }
+    } catch (e) { /* 네트워크 실패 무시, localStorage로만 동작 */ }
+  }
+  fetchAndMergeHistory();
+
   document.getElementById('savedBizSelect').addEventListener('change', e => {
     const id = e.target.value;
     const delBtn = document.getElementById('btnDeleteBiz');
@@ -888,6 +942,9 @@
     const payload = {
       business_name: formData.business_name,
       address: formData.address,
+      postcode: document.getElementById('postcode').value || null,
+      address_road: addrRoad.value || null,
+      address_detail: addrDetail.value || null,
       headcount: parseInt(formData.headcount, 10),
       work_type: formData.work_type,
       special_notes: formData.special_notes || '',
