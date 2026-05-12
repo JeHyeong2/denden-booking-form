@@ -574,8 +574,16 @@
               try {
                 var fd = new FormData(formEl);
                 var obj = Object.fromEntries(fd.entries());
-                if (!obj.business_name || !obj.address || !obj.schedule || !obj.sender_contact) {
-                  alert('필수 정보가 누락되었습니다.');
+                var missing = [];
+                if (!obj.business_name) missing.push('상호명');
+                if (!obj.address) missing.push('주소');
+                if (!obj.schedule || obj.schedule === '[]') missing.push('예약 날짜');
+                if (!obj.headcount) missing.push('인원');
+                if (!obj.work_type) missing.push('업무 종류');
+                if (!obj.sender_name) missing.push('신청자 성함');
+                if (!obj.sender_contact) missing.push('연락처');
+                if (missing.length) {
+                  alert('필수 항목을 확인해주세요: ' + missing.join(', '));
                   return;
                 }
                 var payload = {
@@ -1089,8 +1097,21 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     syncAddress();
+
+    // 필수 필드 명시 검증 (novalidate라 native validation 우회 → 직접 체크)
+    const v = (sel) => {
+      const el = document.querySelector(sel);
+      return el ? String(el.value || '').trim() : '';
+    };
+    if (!v('[name="business_name"]')) { alert('상호명을 입력해주세요.'); return; }
     if (!addrCombined.value) { alert('주소를 검색해주세요.'); return; }
     if (scheduleData.length === 0) { alert('달력에서 예약 날짜를 1개 이상 선택해주세요.'); return; }
+    const hc = parseInt(v('[name="headcount"]'), 10);
+    if (!hc || hc < 1) { alert('인원을 1 이상으로 입력해주세요.'); return; }
+    if (!v('[name="work_type"]')) { alert('업무 종류를 선택해주세요.'); return; }
+    if (!v('[name="sender_name"]')) { alert('신청자 성함을 입력해주세요.'); return; }
+    const contact = v('[name="sender_contact"]');
+    if (!/^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/.test(contact)) { alert('연락처 형식이 올바르지 않습니다. (예: 010-1234-5678)'); return; }
     const consentEl = document.getElementById('consent');
     const consentBox = consentEl.closest('.consent');
     if (!consentEl.checked) {
