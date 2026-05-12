@@ -549,14 +549,68 @@
               var box = c.closest('.consent');
               if (box) {
                 box.classList.remove('invalid');
-                // 강제 reflow로 애니메이션 재시작
                 void box.offsetWidth;
                 box.classList.add('invalid');
                 setTimeout(function () { box.classList.remove('invalid'); }, 1500);
               }
               return false;
             }
-          }, true); // capture phase: form submit listener보다 먼저 잡힘
+          }, true);
+
+          // form default submit 차단 + 메인 script 죽었을 때 fallback fetch
+          var formEl = document.getElementById('bookingForm');
+          if (formEl) {
+            formEl.addEventListener('submit', async function (e) {
+              // 약관 미체크면 차단 (Enter 키로 우회 케이스)
+              if (!c.checked) {
+                e.preventDefault();
+                return;
+              }
+              // 메인 script가 살아서 핸들러 등록됐으면 우리는 skip (그쪽이 처리)
+              if (window.__mainSubmitReady) return;
+              // 메인이 죽었을 때 fallback: 직접 fetch
+              e.preventDefault();
+              console.warn('[fallback-submit] main script not ready, falling back');
+              try {
+                var fd = new FormData(formEl);
+                var obj = Object.fromEntries(fd.entries());
+                if (!obj.business_name || !obj.address || !obj.schedule || !obj.sender_contact) {
+                  alert('필수 정보가 누락되었습니다.');
+                  return;
+                }
+                var payload = {
+                  business_name: obj.business_name,
+                  address: obj.address,
+                  headcount: parseInt(obj.headcount || '1', 10),
+                  work_type: obj.work_type,
+                  special_notes: obj.special_notes || '',
+                  sender_name: obj.sender_name,
+                  sender_contact: obj.sender_contact,
+                  schedule: JSON.parse(obj.schedule || '[]')
+                };
+                if (obj.sender_kakao_id) payload.sender_kakao_id = obj.sender_kakao_id;
+                var API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
+                b.disabled = true; b.textContent = '접수 중...';
+                var r = await fetch(API, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+                var json = await r.json();
+                if (r.ok && (json.booking_id || json.booking_ids)) {
+                  alert('접수 완료 #' + (json.short_id || json.booking_id.substring(0,8)));
+                  formEl.style.display = 'none';
+                } else {
+                  alert('접수 실패: ' + (json.message || 'unknown'));
+                  b.disabled = false; b.textContent = '신청하기';
+                }
+              } catch (err) {
+                console.error('[fallback-submit] err', err);
+                alert('네트워크 오류: ' + err.message);
+                b.disabled = false; b.textContent = '신청하기';
+              }
+            }, true);
+          }
 
           window.__consentBareReady = true;
           console.log('[consent-bare] ready, initial checked=', c.checked);
@@ -575,6 +629,7 @@
 <script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
 
 <script>
+  console.log('[main] script start');
   // ─── URL query → kakao user key ───
   const params = new URLSearchParams(location.search);
   const kakaoKey = params.get('k');
@@ -1102,6 +1157,10 @@
       btn.disabled = false; btn.textContent = '신청하기';
     }
   });
+
+  // 메인 script 정상 완료 — fallback이 자기 차례 아님을 알 수 있도록 flag
+  window.__mainSubmitReady = true;
+  console.log('[main] ready, submit handler registered');
 </script>
 </body>
 </html>
