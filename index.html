@@ -507,10 +507,10 @@
 
     <label class="consent">
       <input type="checkbox" id="consent" required>
-      <span>개인정보(이름, 연락처)를 매칭 안내 목적으로만 수집·이용하는 데 동의합니다</span>
+      <span><strong style="color:var(--red);">[필수]</strong> 개인정보(이름, 연락처)를 매칭 안내 목적으로만 수집·이용하는 데 동의합니다</span>
     </label>
 
-    <button type="submit" class="submit-btn" id="submitBtn">신청하기</button>
+    <button type="submit" class="submit-btn" id="submitBtn" disabled>신청하기</button>
   </form>
 
   <div id="result" class="result"></div>
@@ -936,6 +936,19 @@
     clearCached();
     location.reload();
   });
+
+  // ─── 약관 체크 → 신청하기 버튼 활성/비활성 ───
+  const consentEl = document.getElementById('consent');
+  const submitBtnEl = document.getElementById('submitBtn');
+  function syncSubmitState() {
+    submitBtnEl.disabled = !consentEl.checked;
+    if (consentEl.checked) {
+      const box = consentEl.closest('.consent');
+      if (box) box.classList.remove('invalid');
+    }
+  }
+  consentEl.addEventListener('change', syncSubmitState);
+  syncSubmitState();
 
   // ─── 폼 제출 ───
   const DEFAULT_API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
