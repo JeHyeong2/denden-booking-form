@@ -607,11 +607,6 @@
     syncAddress();
     if (cached.sender_name) document.querySelector('[name="sender_name"]').value = cached.sender_name;
     if (cached.sender_contact) document.querySelector('[name="sender_contact"]').value = cached.sender_contact;
-    if (cached.work_type) document.querySelector('[name="work_type"]').value = cached.work_type;
-    if (cached.headcount) document.querySelector('[name="headcount"]').value = cached.headcount;
-    if (cached.start_time) startSel.value = cached.start_time;
-    if (cached.end_time) endSel.value = cached.end_time;
-    updateTime();
     document.getElementById('prefillNotice').classList.add('show');
   }
   document.getElementById('btnClearPrefill').addEventListener('click', () => {
@@ -652,7 +647,7 @@
       });
       const json = await r.json();
       if (r.ok && json.booking_id) {
-        // 제출 성공 시 입력 값들을 다음 방문 prefill용으로 캐싱
+        // 제출 성공 시 사람·장소 정보만 캐싱 (시간/업무/인원은 매번 다를 수 있어 제외)
         saveCached({
           business_name: data.business_name,
           postcode: document.getElementById('postcode').value,
@@ -660,10 +655,6 @@
           address_detail: addrDetail.value,
           sender_name: data.sender_name,
           sender_contact: data.sender_contact,
-          work_type: data.work_type,
-          headcount: data.headcount,
-          start_time: startSel.value,
-          end_time: endSel.value,
         });
 
         result.className = 'result success';
