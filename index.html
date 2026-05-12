@@ -246,7 +246,7 @@
   // ─── 폼 제출 ───
   // GitHub Pages에서 호스팅되면 location.origin이 github.io라 webhook으로 안 감.
   // 기본값을 cloudflared로 hardcoded. ?api=... 쿼리로 override 가능 (운영 도메인 변경 시).
-  const DEFAULT_API = 'https://christmas-phd-findarticles-principles.trycloudflare.com/webhook/web-form-booking';
+  const DEFAULT_API = 'https://swim-schedules-belkin-broke.trycloudflare.com/webhook/web-form-booking';
   const apiUrl = params.get('api') || (
     location.hostname === 'localhost' ? location.origin + '/webhook/web-form-booking' : DEFAULT_API
   );
