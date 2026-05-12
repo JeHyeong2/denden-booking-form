@@ -518,6 +518,34 @@
     </label>
 
     <button type="submit" class="submit-btn is-locked" id="submitBtn">신청하기</button>
+
+    <script>
+      // 약관 ↔ 신청 버튼 lock 토글 — 다른 코드 영향 차단 위해 격리된 inline script
+      (function () {
+        try {
+          var c = document.getElementById('consent');
+          var b = document.getElementById('submitBtn');
+          if (!c || !b) return;
+          function bareSync() {
+            try {
+              var on = !!c.checked;
+              if (on) b.classList.remove('is-locked');
+              else b.classList.add('is-locked');
+              b.setAttribute('aria-disabled', on ? 'false' : 'true');
+            } catch (e) { console.error('[consent-bare] sync err', e); }
+          }
+          c.addEventListener('change', bareSync);
+          c.addEventListener('click', function () { setTimeout(bareSync, 0); });
+          c.addEventListener('input', bareSync);
+          setInterval(bareSync, 200);
+          bareSync();
+          window.__consentBareReady = true;
+          console.log('[consent-bare] ready, initial checked=', c.checked);
+        } catch (e) {
+          console.error('[consent-bare] init err', e);
+        }
+      })();
+    </script>
   </form>
 
   <div id="result" class="result"></div>
