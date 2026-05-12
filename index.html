@@ -6,10 +6,7 @@
 <meta name="theme-color" content="#1f6feb">
 <title>든든피플 예약 신청</title>
 
-<!-- Pretendard 폰트 -->
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-
-<!-- Flatpickr 캘린더 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 
@@ -29,16 +26,16 @@
     --gray-800: #1f2937;
     --gray-900: #111827;
     --red: #ef4444;
+    --red-light: #fef2f2;
     --green: #10b981;
+    --green-light: #ecfdf5;
     --kakao: #fee500;
     --radius: 12px;
     --radius-sm: 8px;
     --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
     --shadow-focus: 0 0 0 3px rgba(31, 111, 235, 0.15);
   }
-
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
   body {
     margin: 0;
     padding: 24px 16px 40px;
@@ -50,253 +47,198 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
+  .container { max-width: 520px; margin: 0 auto; }
 
-  .container {
-    max-width: 520px;
-    margin: 0 auto;
-  }
-
-  /* ─── 헤더 ─── */
-  header {
-    text-align: center;
-    margin-bottom: 24px;
-  }
-  h1 {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0 0 4px;
-    letter-spacing: -0.02em;
-  }
-  .subtitle {
-    color: var(--gray-500);
-    font-size: 14px;
-    margin: 0;
-  }
+  header { text-align: center; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .subtitle { color: var(--gray-500); font-size: 14px; margin: 0; }
   .kakao-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--kakao);
-    color: #3c1e1e;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    margin-top: 10px;
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--kakao); color: #3c1e1e;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; margin-top: 10px;
   }
-  .kakao-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: #3c1e1e;
-    border-radius: 50%;
-  }
+  .kakao-badge::before { content: ''; width: 6px; height: 6px; background: #3c1e1e; border-radius: 50%; }
 
-  /* prefill notice */
   .prefill-notice {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #fde68a;
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-bottom: 16px;
+    display: none; align-items: center; justify-content: space-between; gap: 8px;
+    background: #fffbeb; color: #92400e; border: 1px solid #fde68a;
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 13px; margin-bottom: 16px;
   }
   .prefill-notice.show { display: flex; }
   .prefill-notice button {
-    background: transparent;
-    border: 0;
-    color: #92400e;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 0;
+    background: transparent; border: 0; color: #92400e;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    text-decoration: underline; padding: 0;
   }
 
-  /* ─── 카드 / 섹션 ─── */
   .card {
-    background: #fff;
-    border-radius: var(--radius);
+    background: #fff; border-radius: var(--radius);
     box-shadow: var(--shadow-card);
-    padding: 28px 24px;
-    margin-bottom: 16px;
+    padding: 28px 24px; margin-bottom: 16px;
   }
   .section-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 12px; font-weight: 700; color: var(--gray-500);
+    text-transform: uppercase; letter-spacing: 0.06em;
     margin: 0 0 16px;
   }
-
-  /* ─── 폼 필드 ─── */
   .field { margin-bottom: 18px; }
   .field:last-child { margin-bottom: 0; }
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: var(--gray-800);
-  }
+  label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--gray-800); }
   label .req {
-    display: inline-block;
-    width: 4px; height: 4px;
-    background: var(--red);
-    border-radius: 50%;
-    vertical-align: super;
-    margin-left: 2px;
+    display: inline-block; width: 4px; height: 4px;
+    background: var(--red); border-radius: 50%;
+    vertical-align: super; margin-left: 2px;
   }
-  .hint {
-    color: var(--gray-500);
-    font-size: 12px;
-    margin: 6px 0 0;
+  .hint { color: var(--gray-500); font-size: 12px; margin: 6px 0 0; }
+  .hint.info {
+    color: var(--primary-dark); background: var(--primary-light);
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    display: flex; gap: 8px; margin-top: 0; margin-bottom: 12px;
   }
-  .hint.error { color: var(--red); }
-  .hint.success { color: var(--green); }
+  .hint.info::before { content: 'ⓘ'; font-weight: bold; }
 
-  /* input common */
   input[type="text"], input[type="tel"], input[type="number"],
-  textarea, select, .fake-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius-sm);
-    font-size: 15px;
-    font-family: inherit;
-    background: #fff;
-    color: var(--gray-900);
-    transition: all 0.15s;
-    -webkit-appearance: none;
-    appearance: none;
+  textarea, select {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+    font-size: 15px; font-family: inherit;
+    background: #fff; color: var(--gray-900);
+    transition: all 0.15s; -webkit-appearance: none; appearance: none;
   }
-  input:focus, textarea:focus, select:focus, .fake-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: var(--shadow-focus);
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: var(--primary); box-shadow: var(--shadow-focus);
   }
-  input[readonly] {
-    background: var(--gray-50);
-    color: var(--gray-700);
-    cursor: not-allowed;
-  }
-  input::placeholder, textarea::placeholder {
-    color: var(--gray-400);
-  }
-  textarea {
-    min-height: 80px;
-    resize: vertical;
-  }
-
-  /* custom select with chevron */
+  input[readonly] { background: var(--gray-50); color: var(--gray-700); cursor: not-allowed; }
+  input::placeholder, textarea::placeholder { color: var(--gray-400); }
+  textarea { min-height: 80px; resize: vertical; }
   select {
     background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
+    background-repeat: no-repeat; background-position: right 14px center;
     padding-right: 38px;
   }
-
-  /* row 2 col */
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  /* address group */
-  .addr-search {
-    display: flex; gap: 8px;
-  }
+  .addr-search { display: flex; gap: 8px; }
   .addr-search input { flex: 1; }
   .btn-search {
-    padding: 0 16px;
-    border: 1.5px solid var(--primary);
-    background: #fff;
-    color: var(--primary);
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 14px;
-    transition: all 0.15s;
+    padding: 0 16px; border: 1.5px solid var(--primary); background: #fff;
+    color: var(--primary); border-radius: var(--radius-sm);
+    font-weight: 600; cursor: pointer; white-space: nowrap;
+    font-size: 14px; transition: all 0.15s;
   }
   .btn-search:hover { background: var(--primary); color: #fff; }
   .btn-search:active { transform: scale(0.97); }
 
-  /* date picker styled */
-  .date-trigger {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .date-trigger::after {
-    content: '';
-    width: 16px; height: 16px;
-    background: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='2' y='3' width='12' height='11' rx='1.5' stroke='%236b7280' stroke-width='1.5'/%3E%3Cpath d='M2 6h12M5 1.5v3M11 1.5v3' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;
-  }
-
-  /* time hint */
-  .time-summary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 14px;
-    background: var(--primary-light);
+  /* 캘린더 - inline */
+  .calendar-wrap {
+    border: 1.5px solid var(--gray-200);
     border-radius: var(--radius-sm);
-    margin-top: 12px;
-    font-size: 14px;
-    color: var(--primary-dark);
-    font-weight: 600;
+    padding: 12px;
+    background: #fff;
   }
-  .time-summary::before {
-    content: '⏱';
+  .calendar-wrap .flatpickr-calendar.inline {
+    box-shadow: none; border: 0; width: 100%; max-width: 100%;
   }
-  .time-summary.empty {
-    background: var(--gray-50);
-    color: var(--gray-400);
-    font-weight: 500;
+  .flatpickr-day.selected,
+  .flatpickr-day.selected.inRange {
+    background: var(--primary) !important; border-color: var(--primary) !important;
   }
-  .time-summary.error {
-    background: #fef2f2;
-    color: var(--red);
-  }
+  .flatpickr-day:hover { background: var(--primary-light) !important; }
 
-  /* 동의 */
-  .consent {
-    display: flex;
-    gap: 12px;
-    padding: 16px;
+  /* 일자 상세 */
+  .schedule-list { display: flex; flex-direction: column; gap: 8px; }
+  .empty-state {
+    text-align: center; color: var(--gray-400);
+    padding: 32px 16px; margin: 0;
+    background: var(--gray-50); border-radius: var(--radius-sm);
+    font-size: 14px;
+  }
+  .schedule-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr 36px;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
     background: var(--gray-50);
     border-radius: var(--radius-sm);
     border: 1px solid var(--gray-200);
-    margin-bottom: 16px;
-    font-size: 13px;
-    color: var(--gray-700);
-    cursor: pointer;
+    max-height: 80px;
+    overflow: hidden;
+    animation: rowFadeIn 0.22s cubic-bezier(.22,.61,.36,1);
+    transition: opacity 0.18s ease, transform 0.18s ease,
+                max-height 0.22s ease, padding 0.22s ease,
+                margin 0.22s ease, border-width 0.22s ease;
   }
-  .consent input[type="checkbox"] {
+  @keyframes rowFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .schedule-row.removing {
+    opacity: 0;
+    transform: translateX(16px);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
     margin: 0;
-    width: 20px; height: 20px;
-    accent-color: var(--primary);
-    flex-shrink: 0;
+    border-width: 0;
   }
-  .consent label {
-    margin: 0; font-weight: 500; cursor: pointer; line-height: 1.45;
+  .empty-state {
+    animation: fadeIn 0.18s ease;
   }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .schedule-summary {
+    animation: fadeIn 0.18s ease;
+  }
+  .schedule-date {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--gray-800);
+    white-space: nowrap;
+  }
+  .schedule-date small {
+    display: block; font-weight: 500; color: var(--gray-500); font-size: 11px;
+  }
+  .schedule-row select {
+    padding: 8px 28px 8px 10px;
+    font-size: 13px;
+    background-color: #fff;
+  }
+  .btn-delete {
+    background: transparent; border: 0; cursor: pointer;
+    padding: 6px; border-radius: 6px;
+    color: var(--gray-400);
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-delete:hover { background: var(--red-light); color: var(--red); }
+  .schedule-summary {
+    margin-top: 12px; padding: 10px 14px;
+    background: var(--primary-light); color: var(--primary-dark);
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .schedule-summary::before { content: '📅'; }
 
-  /* submit */
+  /* 동의 + 제출 */
+  .consent {
+    display: flex; gap: 12px; padding: 16px;
+    background: var(--gray-50); border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200); margin-bottom: 16px;
+    font-size: 13px; color: var(--gray-700); cursor: pointer;
+  }
+  .consent input[type="checkbox"] { margin: 0; width: 20px; height: 20px; accent-color: var(--primary); flex-shrink: 0; }
+  .consent label { margin: 0; font-weight: 500; cursor: pointer; line-height: 1.45; }
+
   .submit-btn {
-    width: 100%;
-    padding: 16px;
-    border: 0;
-    border-radius: var(--radius);
-    background: var(--primary);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
+    width: 100%; padding: 16px; border: 0; border-radius: var(--radius);
+    background: var(--primary); color: #fff;
+    font-size: 16px; font-weight: 700; cursor: pointer;
     transition: all 0.15s;
     box-shadow: 0 4px 14px rgba(31, 111, 235, 0.3);
     font-family: inherit;
@@ -305,61 +247,33 @@
   .submit-btn:active:not(:disabled) { transform: translateY(0); }
   .submit-btn:disabled { background: var(--gray-300); box-shadow: none; cursor: not-allowed; }
 
-  /* result */
   .result {
-    display: none;
-    padding: 24px;
-    border-radius: var(--radius);
-    margin-top: 16px;
-    text-align: center;
-    font-size: 14px;
+    display: none; padding: 24px; border-radius: var(--radius);
+    margin-top: 16px; text-align: center; font-size: 14px;
   }
-  .result.success {
-    display: block;
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-  }
+  .result.success { display: block; background: var(--green-light); color: #065f46; border: 1px solid #a7f3d0; }
   .result.success .check {
-    display: inline-block;
-    width: 48px; height: 48px;
-    background: var(--green);
-    border-radius: 50%;
-    color: #fff;
-    line-height: 48px;
-    font-size: 24px;
+    display: inline-block; width: 48px; height: 48px;
+    background: var(--green); border-radius: 50%;
+    color: #fff; line-height: 48px; font-size: 24px;
     margin-bottom: 12px;
   }
   .result.success h2 { margin: 0 0 8px; font-size: 18px; color: #065f46; }
+  .result.success .booking-id-list {
+    display: inline-flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+    padding: 8px 0;
+  }
   .result.success .booking-id {
-    display: inline-block;
-    padding: 4px 12px;
-    background: #fff;
-    border-radius: 999px;
-    font-family: monospace;
-    font-size: 13px;
-    color: #065f46;
-    margin: 8px 0;
-    font-weight: 700;
+    display: inline-block; padding: 4px 12px;
+    background: #fff; border-radius: 999px;
+    font-family: monospace; font-size: 13px;
+    color: #065f46; font-weight: 700;
   }
-  .result.error {
-    display: block;
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-  }
+  .result.error { display: block; background: var(--red-light); color: #991b1b; border: 1px solid #fecaca; }
 
-  /* flatpickr 한국어 override */
-  .flatpickr-day.selected,
-  .flatpickr-day.selected.inRange {
-    background: var(--primary) !important;
-    border-color: var(--primary) !important;
-  }
-  .flatpickr-day:hover { background: var(--primary-light) !important; }
-
-  /* mobile small */
   @media (max-width: 380px) {
     .row { grid-template-columns: 1fr; }
+    .schedule-row { grid-template-columns: 70px 1fr 1fr 32px; gap: 6px; padding: 10px 8px; }
     body { padding: 16px 12px 32px; }
     .card { padding: 24px 20px; }
   }
@@ -384,12 +298,10 @@
     <!-- 사업장 정보 -->
     <section class="card">
       <p class="section-title">사업장 정보</p>
-
       <div class="field">
         <label>상호명<span class="req"></span></label>
         <input type="text" name="business_name" required maxlength="100" placeholder="예: 강남식당">
       </div>
-
       <div class="field">
         <label>주소<span class="req"></span></label>
         <div class="addr-search" style="margin-bottom:8px;">
@@ -402,37 +314,45 @@
       </div>
     </section>
 
-    <!-- 일정 -->
+    <!-- 기본 시간 + 캘린더 -->
     <section class="card">
       <p class="section-title">예약 일정</p>
 
-      <div class="field">
-        <label>날짜<span class="req"></span></label>
-        <input type="text" id="bookingDate" class="date-trigger" name="booking_date" placeholder="날짜 선택" readonly required>
-      </div>
-
       <div class="row">
         <div class="field">
-          <label>시작 시간<span class="req"></span></label>
-          <select id="startTime" required>
+          <label>기본 시작 시간<span class="req"></span></label>
+          <select id="defaultStartTime" required>
             <option value="">선택</option>
           </select>
         </div>
         <div class="field">
-          <label>종료 시간<span class="req"></span></label>
-          <select id="endTime" required>
+          <label>기본 서비스 시간<span class="req"></span></label>
+          <select id="defaultDuration" required>
             <option value="">선택</option>
           </select>
         </div>
       </div>
-      <div class="time-summary empty" id="timeSummary">시간을 선택해주세요</div>
-      <input type="hidden" name="booking_time" id="bookingTimeCombined">
+
+      <div class="field">
+        <label>예약 날짜<span class="req"></span></label>
+        <p class="hint info">달력에서 날짜를 클릭하면 아래 목록에 추가됩니다. 다시 클릭하면 제거됩니다.</p>
+        <div class="calendar-wrap"><div id="calendar"></div></div>
+      </div>
+    </section>
+
+    <!-- 예약 일자 상세 -->
+    <section class="card">
+      <p class="section-title">예약 일자 상세</p>
+      <div id="scheduleList" class="schedule-list">
+        <p class="empty-state">위 달력에서 날짜를 먼저 선택해주세요</p>
+      </div>
+      <div id="scheduleSummary" class="schedule-summary" style="display:none;"></div>
+      <input type="hidden" name="schedule" id="scheduleJson">
     </section>
 
     <!-- 업무 -->
     <section class="card">
       <p class="section-title">업무 내용</p>
-
       <div class="row">
         <div class="field">
           <label>인원<span class="req"></span></label>
@@ -452,7 +372,6 @@
           </select>
         </div>
       </div>
-
       <div class="field">
         <label>특이사항</label>
         <textarea name="special_notes" maxlength="500" placeholder="예: 엘리베이터 없음, 알레르기 정보, 요청 사항 등 (선택)"></textarea>
@@ -462,18 +381,15 @@
     <!-- 신청자 -->
     <section class="card">
       <p class="section-title">신청자 정보</p>
-
       <div class="field">
         <label>성함<span class="req"></span></label>
         <input type="text" name="sender_name" required maxlength="50" placeholder="실명을 입력해주세요">
       </div>
-
       <div class="field">
         <label>연락처<span class="req"></span></label>
         <input type="tel" name="sender_contact" required pattern="^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$" placeholder="010-1234-5678">
         <p class="hint">매칭 결과를 이 번호로 안내드립니다</p>
       </div>
-
       <input type="hidden" name="sender_kakao_id" id="senderKakaoId">
     </section>
 
@@ -501,8 +417,7 @@
     document.getElementById('kakaoBadge').style.display = 'inline-flex';
   }
 
-  // ─── localStorage 자동완성 (같은 기기/브라우저에서 재방문 시) ───
-  // 카카오 ID 있으면 ID별로 분리, 없으면 default 키
+  // ─── localStorage 자동완성 ───
   const STORAGE_KEY = 'denden_booking_form:' + (kakaoKey || '_default');
   function loadCached() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
@@ -515,20 +430,7 @@
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }
 
-  // ─── 날짜 (Flatpickr) ───
-  const today = new Date();
-  const tomorrow = new Date(today.getTime() + 86400000);
-  flatpickr('#bookingDate', {
-    locale: 'ko',
-    dateFormat: 'Y-m-d',
-    altFormat: 'Y년 m월 d일 (D)',
-    altInput: true,
-    minDate: 'today',
-    defaultDate: tomorrow,
-    disableMobile: false,
-  });
-
-  // ─── 시간 드롭다운 ───
+  // ─── 시간 옵션 ───
   function timeOptions(fromHour, toHour) {
     const list = [];
     for (let h = fromHour; h <= toHour; h++) {
@@ -539,42 +441,185 @@
     }
     return list;
   }
-  const startSel = document.getElementById('startTime');
-  const endSel = document.getElementById('endTime');
-  timeOptions(6, 22).forEach(v => {
-    const o = document.createElement('option'); o.value = v; o.textContent = v;
-    startSel.appendChild(o);
-  });
-  timeOptions(7, 24).forEach(v => {
-    const o = document.createElement('option'); o.value = v;
-    o.textContent = v === '24:00' ? '24:00 (자정)' : v;
-    endSel.appendChild(o);
-  });
+  const startTimeOpts = timeOptions(6, 22);
+  const durationOpts = [1, 2, 3, 4, 5, 6, 7, 8];
 
-  const timeHidden = document.getElementById('bookingTimeCombined');
-  const timeSummary = document.getElementById('timeSummary');
-  function toMin(t) { const [h,m] = t.split(':').map(Number); return h*60 + m; }
-  function updateTime() {
-    const s = startSel.value, e = endSel.value;
-    if (!s || !e) {
-      timeHidden.value = '';
-      timeSummary.className = 'time-summary empty';
-      timeSummary.textContent = '시간을 선택해주세요';
-      return;
-    }
-    if (toMin(e) <= toMin(s)) {
-      timeHidden.value = '';
-      timeSummary.className = 'time-summary error';
-      timeSummary.textContent = '종료 시간은 시작 시간보다 늦어야 합니다';
-      return;
-    }
-    timeHidden.value = `${s}~${e}`;
-    const diff = (toMin(e) - toMin(s)) / 60;
-    timeSummary.className = 'time-summary';
-    timeSummary.textContent = `${s} ~ ${e} · 총 ${diff}시간`;
+  // 기본 드롭다운 채우기
+  const defStartSel = document.getElementById('defaultStartTime');
+  startTimeOpts.forEach(v => {
+    const o = document.createElement('option'); o.value = v; o.textContent = v;
+    defStartSel.appendChild(o);
+  });
+  defStartSel.value = '10:00';
+
+  const defDurSel = document.getElementById('defaultDuration');
+  durationOpts.forEach(v => {
+    const o = document.createElement('option'); o.value = String(v); o.textContent = `${v}시간`;
+    defDurSel.appendChild(o);
+  });
+  defDurSel.value = '3';
+
+  // ─── schedule 데이터 ───
+  // [{ date: 'YYYY-MM-DD', startTime: '10:00', duration: 3 }]
+  let scheduleData = [];
+  let suppressCalendarChange = false; // 우리가 setDate로 캘린더를 sync할 때 onChange 재진입 방지
+  const REMOVE_ANIM_MS = 220;
+
+  function addHours(time, hours) {
+    const [h, m] = time.split(':').map(Number);
+    const totalMin = h * 60 + m + hours * 60;
+    const eh = Math.floor(totalMin / 60);
+    const em = totalMin % 60;
+    return `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
   }
-  startSel.addEventListener('change', updateTime);
-  endSel.addEventListener('change', updateTime);
+
+  function formatKorDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const days = ['일','월','화','수','목','금','토'];
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return { short: `${mm}/${dd}`, weekday: `(${days[d.getDay()]})` };
+  }
+
+  function renderList() {
+    const list = document.getElementById('scheduleList');
+    const summary = document.getElementById('scheduleSummary');
+    const hidden = document.getElementById('scheduleJson');
+
+    if (scheduleData.length === 0) {
+      list.innerHTML = '<p class="empty-state">위 달력에서 날짜를 먼저 선택해주세요</p>';
+      summary.style.display = 'none';
+      hidden.value = '';
+      return;
+    }
+
+    scheduleData.sort((a, b) => a.date.localeCompare(b.date));
+
+    list.innerHTML = scheduleData.map((s, i) => {
+      const k = formatKorDate(s.date);
+      const startOpts = startTimeOpts.map(v => `<option value="${v}" ${v===s.startTime?'selected':''}>${v}</option>`).join('');
+      const durOpts = durationOpts.map(v => `<option value="${v}" ${v===s.duration?'selected':''}>${v}시간</option>`).join('');
+      return `
+        <div class="schedule-row" data-idx="${i}">
+          <div class="schedule-date">${k.short}<small>${k.weekday}</small></div>
+          <select class="schedule-start" data-idx="${i}">${startOpts}</select>
+          <select class="schedule-dur" data-idx="${i}">${durOpts}</select>
+          <button type="button" class="btn-delete" data-idx="${i}" aria-label="삭제">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6M14 11v6"></path>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+          </button>
+        </div>`;
+    }).join('');
+
+    // 이벤트 바인딩
+    list.querySelectorAll('.schedule-start').forEach(el => {
+      el.addEventListener('change', e => {
+        const idx = +e.target.dataset.idx;
+        scheduleData[idx].startTime = e.target.value;
+        updateSummary();
+      });
+    });
+    list.querySelectorAll('.schedule-dur').forEach(el => {
+      el.addEventListener('change', e => {
+        const idx = +e.target.dataset.idx;
+        scheduleData[idx].duration = parseInt(e.target.value, 10);
+        updateSummary();
+      });
+    });
+    list.querySelectorAll('.btn-delete').forEach(el => {
+      el.addEventListener('click', e => {
+        const idx = +e.currentTarget.dataset.idx;
+        const row = e.currentTarget.closest('.schedule-row');
+        if (!row) return;
+        // 1) 즉시 시각적으로 부드럽게 사라짐
+        row.classList.add('removing');
+        // 2) 애니메이션 끝나면 데이터 + 캘린더 sync + 리렌더
+        setTimeout(() => {
+          scheduleData.splice(idx, 1);
+          const remaining = scheduleData.map(s => s.date);
+          // 캘린더 onChange 재진입 방지하며 동기화
+          suppressCalendarChange = true;
+          calendar.setDate(remaining, false);
+          suppressCalendarChange = false;
+          renderList();
+        }, REMOVE_ANIM_MS);
+      });
+    });
+
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const summary = document.getElementById('scheduleSummary');
+    const hidden = document.getElementById('scheduleJson');
+    const totalHours = scheduleData.reduce((s, x) => s + x.duration, 0);
+    summary.textContent = `총 ${scheduleData.length}건 · ${totalHours}시간`;
+    summary.style.display = 'flex';
+    // hidden JSON에 schedule 직렬화
+    hidden.value = JSON.stringify(scheduleData.map(s => ({
+      booking_date: s.date,
+      start_time: s.startTime,
+      duration_hours: s.duration,
+      booking_time: `${s.startTime}~${addHours(s.startTime, s.duration)}`
+    })));
+  }
+
+  // ─── 캘린더 ───
+  function fmtDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+  }
+
+  function addNewDatesToData(newDates) {
+    const defStart = defStartSel.value || '10:00';
+    const defDur = parseInt(defDurSel.value || '3', 10);
+    newDates.forEach(d => {
+      if (!scheduleData.find(s => s.date === d)) {
+        scheduleData.push({ date: d, startTime: defStart, duration: defDur });
+      }
+    });
+  }
+
+  const calendar = flatpickr('#calendar', {
+    inline: true,
+    mode: 'multiple',
+    locale: 'ko',
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
+    onChange: function(dates) {
+      if (suppressCalendarChange) return; // 우리가 setDate로 sync 중이면 무시
+
+      const newDates = dates.map(fmtDate);
+      const existingDates = scheduleData.map(s => s.date);
+      const toRemoveDates = existingDates.filter(d => !newDates.includes(d));
+
+      // 1) 제거할 행이 있으면 먼저 .removing 애니메이션 → 그 후 데이터 sync + 추가 + 리렌더
+      if (toRemoveDates.length > 0) {
+        // 시각적 fade-out
+        toRemoveDates.forEach(d => {
+          const idx = scheduleData.findIndex(s => s.date === d);
+          if (idx < 0) return;
+          const row = document.querySelector(`.schedule-row[data-idx="${idx}"]`);
+          if (row) row.classList.add('removing');
+        });
+        setTimeout(() => {
+          scheduleData = scheduleData.filter(s => newDates.includes(s.date));
+          addNewDatesToData(newDates);
+          renderList();
+        }, REMOVE_ANIM_MS);
+      } else {
+        // 추가만 있는 경우 즉시 반영 (rowFadeIn 애니메이션이 자연 노출)
+        addNewDatesToData(newDates);
+        renderList();
+      }
+    }
+  });
 
   // ─── 주소 (Daum Postcode) ───
   const addrCombined = document.getElementById('addressCombined');
@@ -596,7 +641,7 @@
   });
   addrDetail.addEventListener('input', syncAddress);
 
-  // ─── 캐시 prefill (모든 요소 만들어진 후 실행) ───
+  // ─── 캐시 prefill ───
   const cached = loadCached();
   const hasCached = Object.keys(cached).length > 0;
   if (hasCached) {
@@ -628,41 +673,51 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     syncAddress();
-    updateTime();
     if (!addrCombined.value) { alert('주소를 검색해주세요.'); return; }
-    if (!timeHidden.value) { alert('시작/종료 시간을 올바르게 선택해주세요.'); return; }
+    if (scheduleData.length === 0) { alert('달력에서 예약 날짜를 1개 이상 선택해주세요.'); return; }
     if (!document.getElementById('consent').checked) { alert('개인정보 수집·이용에 동의해주세요.'); return; }
 
     btn.disabled = true; btn.textContent = '접수 중...';
     result.className = 'result'; result.innerHTML = '';
 
-    const data = Object.fromEntries(new FormData(form).entries());
-    if (!data.sender_kakao_id) delete data.sender_kakao_id;
+    const formData = Object.fromEntries(new FormData(form).entries());
+    const payload = {
+      business_name: formData.business_name,
+      address: formData.address,
+      headcount: parseInt(formData.headcount, 10),
+      work_type: formData.work_type,
+      special_notes: formData.special_notes || '',
+      sender_name: formData.sender_name,
+      sender_contact: formData.sender_contact,
+      schedule: JSON.parse(formData.schedule || '[]'),
+    };
+    if (formData.sender_kakao_id) payload.sender_kakao_id = formData.sender_kakao_id;
 
     try {
       const r = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       });
       const json = await r.json();
-      if (r.ok && json.booking_id) {
-        // 제출 성공 시 사람·장소 정보만 캐싱 (시간/업무/인원은 매번 다를 수 있어 제외)
+      if (r.ok && (json.booking_id || json.booking_ids)) {
         saveCached({
-          business_name: data.business_name,
+          business_name: payload.business_name,
           postcode: document.getElementById('postcode').value,
           address_road: addrRoad.value,
           address_detail: addrDetail.value,
-          sender_name: data.sender_name,
-          sender_contact: data.sender_contact,
+          sender_name: payload.sender_name,
+          sender_contact: payload.sender_contact,
         });
-
+        const ids = json.short_ids || (json.booking_ids ? json.booking_ids.map(x => x.substring(0,8)) : [json.short_id || json.booking_id.substring(0,8)]);
+        const count = json.booking_count || ids.length;
+        const idsHtml = ids.map(id => `<span class="booking-id">#${id}</span>`).join('');
         result.className = 'result success';
         result.innerHTML = `
           <div class="check">✓</div>
-          <h2>접수 완료</h2>
-          <div class="booking-id">접수번호 #${json.short_id || json.booking_id.substring(0,8)}</div>
-          <p>${json.message || '곧 안내드리겠습니다.'}</p>
+          <h2>총 ${count}건 접수 완료</h2>
+          <div class="booking-id-list">${idsHtml}</div>
+          <p style="margin-top:12px;">${json.message || '매니저 매칭 후 안내드리겠습니다.'}</p>
         `;
         form.style.display = 'none';
         document.getElementById('prefillNotice').classList.remove('show');
