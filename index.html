@@ -506,7 +506,9 @@
     </section>
 
     <label class="consent">
-      <input type="checkbox" id="consent" required>
+      <input type="checkbox" id="consent" required
+             onchange="if(window.__syncSubmit) window.__syncSubmit();"
+             onclick="if(window.__syncSubmit) setTimeout(window.__syncSubmit, 0);">
       <span><strong style="color:var(--red);">[필수]</strong> 개인정보(이름, 연락처)를 매칭 안내 목적으로만 수집·이용하는 데 동의합니다</span>
     </label>
 
@@ -941,14 +943,26 @@
   const consentEl = document.getElementById('consent');
   const submitBtnEl = document.getElementById('submitBtn');
   function syncSubmitState() {
-    submitBtnEl.disabled = !consentEl.checked;
-    if (consentEl.checked) {
+    if (!consentEl || !submitBtnEl) return;
+    const checked = !!consentEl.checked;
+    submitBtnEl.disabled = !checked;
+    submitBtnEl.removeAttribute('aria-disabled');
+    if (!checked) submitBtnEl.setAttribute('aria-disabled', 'true');
+    if (checked) {
       const box = consentEl.closest('.consent');
       if (box) box.classList.remove('invalid');
     }
   }
-  consentEl.addEventListener('change', syncSubmitState);
+  // 전역 노출 (inline onchange/onclick 핸들러가 호출)
+  window.__syncSubmit = syncSubmitState;
+  // 다중 이벤트 listener (브라우저 차이 흡수)
+  ['change', 'click', 'input'].forEach(evt =>
+    consentEl.addEventListener(evt, () => setTimeout(syncSubmitState, 0))
+  );
+  // 라벨 클릭으로 토글되는 경우도 흡수
+  consentEl.closest('.consent')?.addEventListener('click', () => setTimeout(syncSubmitState, 0));
   syncSubmitState();
+  console.log('[consent] initial state:', consentEl.checked, 'submit disabled:', submitBtnEl.disabled);
 
   // ─── 폼 제출 ───
   const DEFAULT_API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
