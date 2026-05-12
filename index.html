@@ -520,15 +520,39 @@
     <button type="submit" class="submit-btn is-locked" id="submitBtn">신청하기</button>
 
     <script>
-      // 약관 ↔ 신청 버튼 lock 토글 — 격리된 inline script (메인 script 에러 영향 차단)
+      // 모든 필수값 + 약관 → 신청 버튼 lock 토글 — 격리된 inline script
       (function () {
         try {
           var c = document.getElementById('consent');
           var b = document.getElementById('submitBtn');
           if (!c || !b) return;
+
+          var phoneRe = /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/;
+          function val(sel) {
+            var el = document.querySelector(sel);
+            return el ? String(el.value || '').trim() : '';
+          }
+          function isAllValid() {
+            if (!c.checked) return false;
+            if (!val('[name="business_name"]')) return false;
+            var addr = document.getElementById('addressCombined');
+            if (!addr || !addr.value || !addr.value.trim()) return false;
+            var sched = document.getElementById('scheduleJson');
+            if (!sched || !sched.value) return false;
+            try {
+              var arr = JSON.parse(sched.value || '[]');
+              if (!arr.length) return false;
+            } catch (e) { return false; }
+            var hc = parseInt(val('[name="headcount"]'), 10);
+            if (!hc || hc < 1) return false;
+            if (!val('[name="work_type"]')) return false;
+            if (!val('[name="sender_name"]')) return false;
+            if (!phoneRe.test(val('[name="sender_contact"]'))) return false;
+            return true;
+          }
           function bareSync() {
             try {
-              var on = !!c.checked;
+              var on = isAllValid();
               if (on) b.classList.remove('is-locked');
               else b.classList.add('is-locked');
               b.setAttribute('aria-disabled', on ? 'false' : 'true');
