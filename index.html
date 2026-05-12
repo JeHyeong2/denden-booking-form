@@ -3,181 +3,500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1f6feb">
 <title>든든피플 예약 신청</title>
+
+<!-- Pretendard 폰트 -->
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+<!-- Flatpickr 캘린더 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+
 <style>
+  :root {
+    --primary: #1f6feb;
+    --primary-light: #e9f1ff;
+    --primary-dark: #1456c4;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --red: #ef4444;
+    --green: #10b981;
+    --kakao: #fee500;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-focus: 0 0 0 3px rgba(31, 111, 235, 0.15);
+  }
+
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
   body {
-    margin: 0; padding: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
-    background: #f5f7fa; color: #222; font-size: 16px;
+    margin: 0;
+    padding: 24px 16px 40px;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #f5f7fa 0%, #eef2f6 100%);
+    color: var(--gray-900);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
-  .container { max-width: 480px; margin: 0 auto; }
-  h1 { font-size: 22px; margin: 8px 0 4px; }
-  .subtitle { color: #666; font-size: 13px; margin-bottom: 24px; }
-  .form-group { margin-bottom: 18px; }
-  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
-  label .required { color: #e74c3c; margin-left: 2px; }
-  input[type="text"], input[type="tel"], input[type="date"], input[type="number"],
-  textarea, select {
-    width: 100%; padding: 12px; border: 1px solid #d0d7de; border-radius: 8px;
-    font-size: 16px; font-family: inherit; background: #fff;
+
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
   }
-  input:focus, textarea:focus, select:focus {
-    outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+
+  /* ─── 헤더 ─── */
+  header {
+    text-align: center;
+    margin-bottom: 24px;
   }
-  input[readonly] { background: #f5f7fa; color: #555; cursor: not-allowed; }
-  textarea { min-height: 72px; resize: vertical; }
-  .hint { color: #888; font-size: 12px; margin-top: 4px; }
-  .row { display: flex; gap: 8px; }
-  .row > * { flex: 1; }
-  .addr-row { display: flex; gap: 8px; }
-  .addr-row input { flex: 1; }
-  .btn-search {
-    padding: 0 16px; border: 1px solid #3b82f6; background: #fff;
-    color: #3b82f6; border-radius: 8px; font-weight: 600; cursor: pointer;
-    white-space: nowrap; font-size: 14px;
+  header .logo {
+    display: inline-block;
+    width: 48px; height: 48px;
+    background: var(--primary);
+    border-radius: 14px;
+    color: #fff;
+    line-height: 48px;
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 14px rgba(31, 111, 235, 0.3);
   }
-  .btn-search:hover { background: #3b82f6; color: #fff; }
-  .consent {
-    display: flex; align-items: flex-start; gap: 8px; padding: 12px;
-    background: #f0f4f9; border-radius: 8px; font-size: 13px; color: #555;
-    margin: 16px 0;
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
   }
-  .consent input { margin-top: 2px; }
-  button[type="submit"] {
-    width: 100%; padding: 14px; border: 0; border-radius: 8px;
-    background: #3b82f6; color: #fff; font-size: 17px; font-weight: 700;
-    cursor: pointer; transition: background 0.15s;
+  .subtitle {
+    color: var(--gray-500);
+    font-size: 14px;
+    margin: 0;
   }
-  button[type="submit"]:hover:not(:disabled) { background: #2563eb; }
-  button[type="submit"]:disabled { background: #aaa; cursor: not-allowed; }
-  .result {
-    display: none; padding: 16px; border-radius: 8px; margin-top: 16px;
-    font-size: 14px; text-align: center;
-  }
-  .result.success { display: block; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-  .result.error { display: block; background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
   .kakao-badge {
-    display: inline-block; background: #fee500; color: #3c1e1e;
-    padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
-    margin-left: 6px; vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--kakao);
+    color: #3c1e1e;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+  .kakao-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #3c1e1e;
+    border-radius: 50%;
+  }
+
+  /* ─── 카드 / 섹션 ─── */
+  .card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 28px 24px;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 16px;
+  }
+
+  /* ─── 폼 필드 ─── */
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--gray-800);
+  }
+  label .req {
+    display: inline-block;
+    width: 4px; height: 4px;
+    background: var(--red);
+    border-radius: 50%;
+    vertical-align: super;
+    margin-left: 2px;
+  }
+  .hint {
+    color: var(--gray-500);
+    font-size: 12px;
+    margin: 6px 0 0;
+  }
+  .hint.error { color: var(--red); }
+  .hint.success { color: var(--green); }
+
+  /* input common */
+  input[type="text"], input[type="tel"], input[type="number"],
+  textarea, select, .fake-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--gray-900);
+    transition: all 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus, textarea:focus, select:focus, .fake-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-focus);
+  }
+  input[readonly] {
+    background: var(--gray-50);
+    color: var(--gray-700);
+    cursor: not-allowed;
+  }
+  input::placeholder, textarea::placeholder {
+    color: var(--gray-400);
+  }
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  /* custom select with chevron */
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+  }
+
+  /* row 2 col */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* address group */
+  .addr-search {
+    display: flex; gap: 8px;
+  }
+  .addr-search input { flex: 1; }
+  .btn-search {
+    padding: 0 16px;
+    border: 1.5px solid var(--primary);
+    background: #fff;
+    color: var(--primary);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .btn-search:hover { background: var(--primary); color: #fff; }
+  .btn-search:active { transform: scale(0.97); }
+
+  /* date picker styled */
+  .date-trigger {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .date-trigger::after {
+    content: '';
+    width: 16px; height: 16px;
+    background: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='2' y='3' width='12' height='11' rx='1.5' stroke='%236b7280' stroke-width='1.5'/%3E%3Cpath d='M2 6h12M5 1.5v3M11 1.5v3' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+
+  /* time hint */
+  .time-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: var(--primary-light);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--primary-dark);
+    font-weight: 600;
+  }
+  .time-summary::before {
+    content: '⏱';
+  }
+  .time-summary.empty {
+    background: var(--gray-50);
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+  .time-summary.error {
+    background: #fef2f2;
+    color: var(--red);
+  }
+
+  /* 동의 */
+  .consent {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--gray-700);
+    cursor: pointer;
+  }
+  .consent input[type="checkbox"] {
+    margin: 0;
+    width: 20px; height: 20px;
+    accent-color: var(--primary);
+    flex-shrink: 0;
+  }
+  .consent label {
+    margin: 0; font-weight: 500; cursor: pointer; line-height: 1.45;
+  }
+
+  /* submit */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 14px rgba(31, 111, 235, 0.3);
+    font-family: inherit;
+  }
+  .submit-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
+  .submit-btn:active:not(:disabled) { transform: translateY(0); }
+  .submit-btn:disabled { background: var(--gray-300); box-shadow: none; cursor: not-allowed; }
+
+  /* result */
+  .result {
+    display: none;
+    padding: 24px;
+    border-radius: var(--radius);
+    margin-top: 16px;
+    text-align: center;
+    font-size: 14px;
+  }
+  .result.success {
+    display: block;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  .result.success .check {
+    display: inline-block;
+    width: 48px; height: 48px;
+    background: var(--green);
+    border-radius: 50%;
+    color: #fff;
+    line-height: 48px;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+  .result.success h2 { margin: 0 0 8px; font-size: 18px; color: #065f46; }
+  .result.success .booking-id {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #fff;
+    border-radius: 999px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #065f46;
+    margin: 8px 0;
+    font-weight: 700;
+  }
+  .result.error {
+    display: block;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  /* flatpickr 한국어 override */
+  .flatpickr-day.selected,
+  .flatpickr-day.selected.inRange {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+  }
+  .flatpickr-day:hover { background: var(--primary-light) !important; }
+
+  /* mobile small */
+  @media (max-width: 380px) {
+    .row { grid-template-columns: 1fr; }
+    body { padding: 16px 12px 32px; }
+    .card { padding: 24px 20px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>예약 신청 <span id="kakaoBadge" class="kakao-badge" style="display:none;">카톡 연결됨</span></h1>
-  <p class="subtitle">아래 양식을 작성해주시면 매니저 매칭 후 입력하신 연락처로 안내드립니다.</p>
 
-  <form id="bookingForm">
-    <div class="form-group">
-      <label>상호명<span class="required">*</span></label>
-      <input type="text" name="business_name" required maxlength="100" placeholder="예: 강남식당">
-    </div>
+  <header>
+    <div class="logo">든</div>
+    <h1>예약 신청</h1>
+    <p class="subtitle">매니저 매칭 후 입력하신 연락처로 안내드립니다</p>
+    <div id="kakaoBadge" class="kakao-badge" style="display:none;">카카오톡 연결됨</div>
+  </header>
 
-    <div class="form-group">
-      <label>주소<span class="required">*</span></label>
-      <div class="addr-row" style="margin-bottom:8px;">
-        <input type="text" id="postcode" placeholder="우편번호" readonly>
-        <button type="button" class="btn-search" id="btnSearchAddr">주소 검색</button>
+  <form id="bookingForm" novalidate>
+
+    <!-- 사업장 정보 -->
+    <section class="card">
+      <p class="section-title">사업장 정보</p>
+
+      <div class="field">
+        <label>상호명<span class="req"></span></label>
+        <input type="text" name="business_name" required maxlength="100" placeholder="예: 강남식당">
       </div>
-      <input type="text" id="addressRoad" placeholder="도로명/지번 주소" readonly required style="margin-bottom:8px;">
-      <input type="text" id="addressDetail" placeholder="상세주소 (예: 3층 또는 101호)" maxlength="100">
-      <input type="hidden" name="address" id="addressCombined">
-    </div>
 
-    <div class="form-group">
-      <label>날짜<span class="required">*</span></label>
-      <input type="date" name="booking_date" id="bookingDate" required>
-      <p class="hint">예약 희망일을 선택해주세요</p>
-    </div>
-
-    <div class="row">
-      <div class="form-group">
-        <label>시작 시간<span class="required">*</span></label>
-        <select id="startTime" required>
-          <option value="">선택...</option>
-        </select>
+      <div class="field">
+        <label>주소<span class="req"></span></label>
+        <div class="addr-search" style="margin-bottom:8px;">
+          <input type="text" id="postcode" placeholder="우편번호" readonly>
+          <button type="button" class="btn-search" id="btnSearchAddr">주소 검색</button>
+        </div>
+        <input type="text" id="addressRoad" placeholder="도로명/지번 주소" readonly required style="margin-bottom:8px;">
+        <input type="text" id="addressDetail" placeholder="상세주소 (선택, 예: 3층 / 101호)" maxlength="100">
+        <input type="hidden" name="address" id="addressCombined">
       </div>
-      <div class="form-group">
-        <label>종료 시간<span class="required">*</span></label>
-        <select id="endTime" required>
-          <option value="">선택...</option>
-        </select>
+    </section>
+
+    <!-- 일정 -->
+    <section class="card">
+      <p class="section-title">예약 일정</p>
+
+      <div class="field">
+        <label>날짜<span class="req"></span></label>
+        <input type="text" id="bookingDate" class="date-trigger" name="booking_date" placeholder="날짜 선택" readonly required>
       </div>
-    </div>
-    <p class="hint" id="timeHint" style="margin-top:-10px; margin-bottom:18px;"></p>
-    <input type="hidden" name="booking_time" id="bookingTimeCombined">
 
-    <div class="row">
-      <div class="form-group">
-        <label>인원<span class="required">*</span></label>
-        <input type="number" name="headcount" required min="1" max="50" value="1">
+      <div class="row">
+        <div class="field">
+          <label>시작 시간<span class="req"></span></label>
+          <select id="startTime" required>
+            <option value="">선택</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>종료 시간<span class="req"></span></label>
+          <select id="endTime" required>
+            <option value="">선택</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label>업무<span class="required">*</span></label>
-        <select name="work_type" required>
-          <option value="">선택...</option>
-          <option>홀서빙</option>
-          <option>주방보조</option>
-          <option>설거지</option>
-          <option>청소</option>
-          <option>정리수납</option>
-          <option>이사</option>
-          <option>기타</option>
-        </select>
+      <div class="time-summary empty" id="timeSummary">시간을 선택해주세요</div>
+      <input type="hidden" name="booking_time" id="bookingTimeCombined">
+    </section>
+
+    <!-- 업무 -->
+    <section class="card">
+      <p class="section-title">업무 내용</p>
+
+      <div class="row">
+        <div class="field">
+          <label>인원<span class="req"></span></label>
+          <input type="number" name="headcount" required min="1" max="50" value="1">
+        </div>
+        <div class="field">
+          <label>업무 종류<span class="req"></span></label>
+          <select name="work_type" required>
+            <option value="">선택</option>
+            <option>홀서빙</option>
+            <option>주방보조</option>
+            <option>설거지</option>
+            <option>청소</option>
+            <option>정리수납</option>
+            <option>이사</option>
+            <option>기타</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label>특이사항</label>
-      <textarea name="special_notes" maxlength="500" placeholder="없으면 비워두세요"></textarea>
-    </div>
+      <div class="field">
+        <label>특이사항</label>
+        <textarea name="special_notes" maxlength="500" placeholder="예: 엘리베이터 없음, 알레르기 정보, 요청 사항 등 (선택)"></textarea>
+      </div>
+    </section>
 
-    <div class="form-group">
-      <label>신청자 성함<span class="required">*</span></label>
-      <input type="text" name="sender_name" required maxlength="50">
-    </div>
+    <!-- 신청자 -->
+    <section class="card">
+      <p class="section-title">신청자 정보</p>
 
-    <div class="form-group">
-      <label>신청자 연락처<span class="required">*</span></label>
-      <input type="tel" name="sender_contact" required pattern="^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$" placeholder="010-1234-5678">
-      <p class="hint">매니저 매칭 후 이 번호로 연락드립니다.</p>
-    </div>
+      <div class="field">
+        <label>성함<span class="req"></span></label>
+        <input type="text" name="sender_name" required maxlength="50" placeholder="실명을 입력해주세요">
+      </div>
 
-    <input type="hidden" name="sender_kakao_id" id="senderKakaoId">
+      <div class="field">
+        <label>연락처<span class="req"></span></label>
+        <input type="tel" name="sender_contact" required pattern="^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$" placeholder="010-1234-5678">
+        <p class="hint">매칭 결과를 이 번호로 안내드립니다</p>
+      </div>
 
-    <div class="consent">
+      <input type="hidden" name="sender_kakao_id" id="senderKakaoId">
+    </section>
+
+    <label class="consent">
       <input type="checkbox" id="consent" required>
-      <label for="consent" style="margin:0; font-weight:normal;">
-        개인정보(이름, 연락처)를 매칭 안내 목적으로 수집·이용에 동의합니다.
-      </label>
-    </div>
+      <span>개인정보(이름, 연락처)를 매칭 안내 목적으로만 수집·이용하는 데 동의합니다</span>
+    </label>
 
-    <button type="submit" id="submitBtn">신청하기</button>
+    <button type="submit" class="submit-btn" id="submitBtn">신청하기</button>
   </form>
 
   <div id="result" class="result"></div>
 </div>
 
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
+
 <script>
-  // ─── URL query에서 kakao user key 추출 ───
+  // ─── URL query → kakao user key ───
   const params = new URLSearchParams(location.search);
   const kakaoKey = params.get('k');
   if (kakaoKey) {
     document.getElementById('senderKakaoId').value = kakaoKey;
-    document.getElementById('kakaoBadge').style.display = 'inline-block';
+    document.getElementById('kakaoBadge').style.display = 'inline-flex';
   }
 
-  // ─── 날짜 기본값: 내일 + 최소: 오늘 ───
+  // ─── 날짜 (Flatpickr) ───
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 86400000);
-  const fmt = d => d.toISOString().slice(0, 10);
-  document.getElementById('bookingDate').min = fmt(today);
-  document.getElementById('bookingDate').value = fmt(tomorrow);
+  flatpickr('#bookingDate', {
+    locale: 'ko',
+    dateFormat: 'Y-m-d',
+    altFormat: 'Y년 m월 d일 (D)',
+    altInput: true,
+    minDate: 'today',
+    defaultDate: tomorrow,
+    disableMobile: false,
+  });
 
-  // ─── 시간 드롭다운 옵션 생성 (06:00 ~ 24:00, 30분 단위) ───
+  // ─── 시간 드롭다운 ───
   function timeOptions(fromHour, toHour) {
     const list = [];
     for (let h = fromHour; h <= toHour; h++) {
@@ -190,41 +509,42 @@
   }
   const startSel = document.getElementById('startTime');
   const endSel = document.getElementById('endTime');
-  // 시작: 06:00 ~ 22:00
   timeOptions(6, 22).forEach(v => {
-    const opt = document.createElement('option'); opt.value = v; opt.textContent = v;
-    startSel.appendChild(opt);
+    const o = document.createElement('option'); o.value = v; o.textContent = v;
+    startSel.appendChild(o);
   });
-  // 종료: 07:00 ~ 24:00
   timeOptions(7, 24).forEach(v => {
-    const opt = document.createElement('option'); opt.value = v; opt.textContent = (v === '24:00' ? '24:00 (자정)' : v);
-    opt.value = v;
-    endSel.appendChild(opt);
+    const o = document.createElement('option'); o.value = v;
+    o.textContent = v === '24:00' ? '24:00 (자정)' : v;
+    endSel.appendChild(o);
   });
 
-  // ─── 시작/종료 시간 → booking_time 합치기 + 검증 ───
   const timeHidden = document.getElementById('bookingTimeCombined');
-  const timeHint = document.getElementById('timeHint');
+  const timeSummary = document.getElementById('timeSummary');
   function toMin(t) { const [h,m] = t.split(':').map(Number); return h*60 + m; }
   function updateTime() {
-    const start = startSel.value;
-    const end = endSel.value;
-    if (!start || !end) { timeHidden.value = ''; timeHint.textContent = ''; return; }
-    if (toMin(end) <= toMin(start)) {
+    const s = startSel.value, e = endSel.value;
+    if (!s || !e) {
       timeHidden.value = '';
-      timeHint.textContent = '⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.';
-      timeHint.style.color = '#c62828';
+      timeSummary.className = 'time-summary empty';
+      timeSummary.textContent = '시간을 선택해주세요';
       return;
     }
-    timeHidden.value = `${start}~${end}`;
-    const diff = (toMin(end) - toMin(start)) / 60;
-    timeHint.textContent = `총 ${diff}시간`;
-    timeHint.style.color = '#888';
+    if (toMin(e) <= toMin(s)) {
+      timeHidden.value = '';
+      timeSummary.className = 'time-summary error';
+      timeSummary.textContent = '종료 시간은 시작 시간보다 늦어야 합니다';
+      return;
+    }
+    timeHidden.value = `${s}~${e}`;
+    const diff = (toMin(e) - toMin(s)) / 60;
+    timeSummary.className = 'time-summary';
+    timeSummary.textContent = `${s} ~ ${e} · 총 ${diff}시간`;
   }
   startSel.addEventListener('change', updateTime);
   endSel.addEventListener('change', updateTime);
 
-  // ─── 주소 (Daum 우편번호) ───
+  // ─── 주소 (Daum Postcode) ───
   const addrCombined = document.getElementById('addressCombined');
   const addrRoad = document.getElementById('addressRoad');
   const addrDetail = document.getElementById('addressDetail');
@@ -233,38 +553,37 @@
   }
   document.getElementById('btnSearchAddr').addEventListener('click', () => {
     new daum.Postcode({
-      oncomplete: function(data) {
+      oncomplete: (data) => {
         document.getElementById('postcode').value = data.zonecode;
         addrRoad.value = data.roadAddress || data.jibunAddress;
         syncAddress();
         addrDetail.focus();
-      }
+      },
+      theme: { bgColor: '#FFFFFF', searchBgColor: '#1f6feb', queryTextColor: '#FFFFFF' }
     }).open();
   });
   addrDetail.addEventListener('input', syncAddress);
 
   // ─── 폼 제출 ───
-  // GitHub Pages에서 호스팅되면 location.origin이 github.io라 webhook으로 안 감.
-  // 기본값을 cloudflared로 hardcoded. ?api=... 쿼리로 override 가능 (운영 도메인 변경 시).
   const DEFAULT_API = 'https://swim-schedules-belkin-broke.trycloudflare.com/webhook/web-form-booking';
   const apiUrl = params.get('api') || (
     location.hostname === 'localhost' ? location.origin + '/webhook/web-form-booking' : DEFAULT_API
   );
+
   const form = document.getElementById('bookingForm');
   const btn = document.getElementById('submitBtn');
   const result = document.getElementById('result');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    // 주소·시간 hidden 동기화 보증
     syncAddress();
     updateTime();
     if (!addrCombined.value) { alert('주소를 검색해주세요.'); return; }
     if (!timeHidden.value) { alert('시작/종료 시간을 올바르게 선택해주세요.'); return; }
+    if (!document.getElementById('consent').checked) { alert('개인정보 수집·이용에 동의해주세요.'); return; }
 
     btn.disabled = true; btn.textContent = '접수 중...';
-    result.className = 'result'; result.textContent = '';
+    result.className = 'result'; result.innerHTML = '';
 
     const data = Object.fromEntries(new FormData(form).entries());
     if (!data.sender_kakao_id) delete data.sender_kakao_id;
@@ -278,14 +597,20 @@
       const json = await r.json();
       if (r.ok && json.booking_id) {
         result.className = 'result success';
-        result.innerHTML = `<strong>접수 완료</strong><br>접수번호 #${json.short_id || json.booking_id.substring(0,8)}<br>${json.message || '곧 안내드리겠습니다.'}`;
+        result.innerHTML = `
+          <div class="check">✓</div>
+          <h2>접수 완료</h2>
+          <div class="booking-id">접수번호 #${json.short_id || json.booking_id.substring(0,8)}</div>
+          <p>${json.message || '곧 안내드리겠습니다.'}</p>
+        `;
         form.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         throw new Error(json.message || 'submit failed');
       }
     } catch (err) {
       result.className = 'result error';
-      result.textContent = '접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. (' + err.message + ')';
+      result.textContent = '접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
       btn.disabled = false; btn.textContent = '신청하기';
     }
   });
