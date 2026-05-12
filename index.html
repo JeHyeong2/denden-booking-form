@@ -347,6 +347,17 @@
     <!-- 사업장 정보 -->
     <section class="card">
       <p class="section-title">사업장 정보</p>
+
+      <div id="savedBiz" class="saved-biz">
+        <div class="saved-biz-label">저장된 업체</div>
+        <div class="saved-biz-row">
+          <select id="savedBizSelect">
+            <option value="">+ 새 업체로 입력</option>
+          </select>
+          <button type="button" id="btnDeleteBiz" class="saved-biz-delete" disabled>삭제</button>
+        </div>
+      </div>
+
       <div class="field">
         <label>상호명<span class="req"></span></label>
         <input type="text" name="business_name" required maxlength="100" placeholder="예: 강남식당">
@@ -466,15 +477,68 @@
     document.getElementById('kakaoBadge').style.display = 'inline-flex';
   }
 
-  // ─── localStorage 자동완성 ───
+  // ─── localStorage: sender 정보 + businesses 배열 ───
   const STORAGE_KEY = 'denden_booking_form:' + (kakaoKey || '_default');
-  function loadCached() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-    catch { return {}; }
+  const MAX_BUSINESSES = 10;
+
+  function _uuid() {
+    return (crypto && crypto.randomUUID) ? crypto.randomUUID()
+      : 'x' + Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
-  function saveCached(data) {
+
+  function loadCached() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      // 새 형식
+      if (Array.isArray(raw.businesses)) return raw;
+      // 옛 형식 자동 마이그레이션
+      if (raw.business_name) {
+        return {
+          sender_name: raw.sender_name,
+          sender_contact: raw.sender_contact,
+          businesses: [{
+            id: _uuid(),
+            business_name: raw.business_name,
+            postcode: raw.postcode,
+            address_road: raw.address_road,
+            address_detail: raw.address_detail,
+            last_used: new Date().toISOString(),
+          }],
+        };
+      }
+      return { businesses: [] };
+    } catch { return { businesses: [] }; }
+  }
+
+  function _writeCached(data) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
   }
+
+  function saveBusinessAndSender(business, sender_name, sender_contact) {
+    const cached = loadCached();
+    cached.sender_name = sender_name;
+    cached.sender_contact = sender_contact;
+    cached.businesses = cached.businesses || [];
+    const same = cached.businesses.find(b =>
+      b.business_name === business.business_name &&
+      (b.address_road || '') === (business.address_road || '')
+    );
+    if (same) {
+      Object.assign(same, business, { last_used: new Date().toISOString() });
+    } else {
+      cached.businesses.push({ id: _uuid(), ...business, last_used: new Date().toISOString() });
+    }
+    cached.businesses.sort((a, b) => (b.last_used || '').localeCompare(a.last_used || ''));
+    cached.businesses = cached.businesses.slice(0, MAX_BUSINESSES);
+    _writeCached(cached);
+  }
+
+  function deleteBusiness(id) {
+    const cached = loadCached();
+    cached.businesses = (cached.businesses || []).filter(b => b.id !== id);
+    _writeCached(cached);
+  }
+
   function clearCached() {
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }
@@ -692,20 +756,74 @@
   addrDetail.addEventListener('input', syncAddress);
 
   // ─── 캐시 prefill ───
-  const cached = loadCached();
-  const hasCached = Object.keys(cached).length > 0;
-  if (hasCached) {
-    if (cached.business_name) document.querySelector('[name="business_name"]').value = cached.business_name;
-    if (cached.postcode) document.getElementById('postcode').value = cached.postcode;
-    if (cached.address_road) addrRoad.value = cached.address_road;
-    if (cached.address_detail) addrDetail.value = cached.address_detail;
+  function applyBusinessToForm(b) {
+    document.querySelector('[name="business_name"]').value = b?.business_name || '';
+    document.getElementById('postcode').value = b?.postcode || '';
+    addrRoad.value = b?.address_road || '';
+    addrDetail.value = b?.address_detail || '';
     syncAddress();
-    if (cached.sender_name) document.querySelector('[name="sender_name"]').value = cached.sender_name;
-    if (cached.sender_contact) document.querySelector('[name="sender_contact"]').value = cached.sender_contact;
-    document.getElementById('prefillNotice').classList.add('show');
   }
+
+  function renderSavedBiz() {
+    const cached = loadCached();
+    const list = cached.businesses || [];
+    const wrap = document.getElementById('savedBiz');
+    const sel = document.getElementById('savedBizSelect');
+    const delBtn = document.getElementById('btnDeleteBiz');
+
+    sel.innerHTML = '<option value="">+ 새 업체로 입력</option>';
+    list.forEach(b => {
+      const short = (b.address_road || '').slice(0, 20);
+      const o = document.createElement('option');
+      o.value = b.id;
+      o.textContent = `${b.business_name}${short ? ` · ${short}…` : ''}`;
+      sel.appendChild(o);
+    });
+
+    if (list.length > 0) {
+      wrap.classList.add('show');
+      // 가장 최근 업체 자동 prefill
+      sel.value = list[0].id;
+      applyBusinessToForm(list[0]);
+      delBtn.disabled = false;
+    } else {
+      wrap.classList.remove('show');
+      delBtn.disabled = true;
+    }
+  }
+
+  const cached = loadCached();
+  if (cached.sender_name) document.querySelector('[name="sender_name"]').value = cached.sender_name;
+  if (cached.sender_contact) document.querySelector('[name="sender_contact"]').value = cached.sender_contact;
+  renderSavedBiz();
+  const hasAnyCache = (cached.businesses || []).length > 0 || cached.sender_name;
+  if (hasAnyCache) document.getElementById('prefillNotice').classList.add('show');
+
+  document.getElementById('savedBizSelect').addEventListener('change', e => {
+    const id = e.target.value;
+    const delBtn = document.getElementById('btnDeleteBiz');
+    if (!id) {
+      applyBusinessToForm(null);
+      delBtn.disabled = true;
+      return;
+    }
+    const b = (loadCached().businesses || []).find(x => x.id === id);
+    if (b) applyBusinessToForm(b);
+    delBtn.disabled = false;
+  });
+
+  document.getElementById('btnDeleteBiz').addEventListener('click', () => {
+    const id = document.getElementById('savedBizSelect').value;
+    if (!id) return;
+    const b = (loadCached().businesses || []).find(x => x.id === id);
+    if (!b) return;
+    if (!confirm(`'${b.business_name}' 업체 정보를 삭제할까요?`)) return;
+    deleteBusiness(id);
+    renderSavedBiz();
+  });
+
   document.getElementById('btnClearPrefill').addEventListener('click', () => {
-    if (!confirm('저장된 자동완성 정보를 모두 지울까요?')) return;
+    if (!confirm('저장된 모든 업체와 신청자 정보를 지울까요?')) return;
     clearCached();
     location.reload();
   });
@@ -751,14 +869,12 @@
       });
       const json = await r.json();
       if (r.ok && (json.booking_id || json.booking_ids)) {
-        saveCached({
+        saveBusinessAndSender({
           business_name: payload.business_name,
           postcode: document.getElementById('postcode').value,
           address_road: addrRoad.value,
           address_detail: addrDetail.value,
-          sender_name: payload.sender_name,
-          sender_contact: payload.sender_contact,
-        });
+        }, payload.sender_name, payload.sender_contact);
         const ids = json.short_ids || (json.booking_ids ? json.booking_ids.map(x => x.substring(0,8)) : [json.short_id || json.booking_id.substring(0,8)]);
         const count = json.booking_count || ids.length;
         const idsHtml = ids.map(id => `<span class="booking-id">#${id}</span>`).join('');
