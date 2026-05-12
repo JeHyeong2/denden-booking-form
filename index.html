@@ -131,21 +131,70 @@
   .btn-search:hover { background: var(--primary); color: #fff; }
   .btn-search:active { transform: scale(0.97); }
 
-  /* 캘린더 - inline */
+  /* 캘린더 - inline (모바일 친화 크기) */
   .calendar-wrap {
     border: 1.5px solid var(--gray-200);
     border-radius: var(--radius-sm);
-    padding: 12px;
+    padding: 8px;
     background: #fff;
   }
   .calendar-wrap .flatpickr-calendar.inline {
-    box-shadow: none; border: 0; width: 100%; max-width: 100%;
+    box-shadow: none; border: 0; width: 100% !important; max-width: 100%;
+  }
+  .calendar-wrap .flatpickr-rContainer,
+  .calendar-wrap .flatpickr-days,
+  .calendar-wrap .dayContainer {
+    width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+  }
+  .calendar-wrap .dayContainer {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .calendar-wrap .flatpickr-day {
+    max-width: none !important;
+    width: 100% !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    font-size: 15px;
+    border-radius: 8px !important;
+    margin: 0 !important;
+  }
+  .calendar-wrap .flatpickr-weekday {
+    height: 32px; line-height: 32px;
+    font-size: 12px; font-weight: 600;
+    color: var(--gray-500);
+  }
+  .calendar-wrap .flatpickr-weekdaycontainer {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .calendar-wrap .flatpickr-months {
+    height: 44px; margin-bottom: 4px;
+  }
+  .calendar-wrap .flatpickr-current-month {
+    font-size: 16px; font-weight: 700; padding: 6px 0;
+  }
+  .calendar-wrap .flatpickr-prev-month,
+  .calendar-wrap .flatpickr-next-month {
+    padding: 12px;
+  }
+  .calendar-wrap .flatpickr-prev-month:hover,
+  .calendar-wrap .flatpickr-next-month:hover {
+    background: var(--gray-100); border-radius: 8px;
   }
   .flatpickr-day.selected,
   .flatpickr-day.selected.inRange {
     background: var(--primary) !important; border-color: var(--primary) !important;
+    color: #fff !important;
   }
   .flatpickr-day:hover { background: var(--primary-light) !important; }
+  .flatpickr-day.today {
+    border-color: var(--primary) !important;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .flatpickr-day.today.selected { color: #fff !important; }
 
   /* 일자 상세 */
   .schedule-list { display: flex; flex-direction: column; gap: 8px; }
@@ -442,7 +491,7 @@
     return list;
   }
   const startTimeOpts = timeOptions(6, 22);
-  const durationOpts = [1, 2, 3, 4, 5, 6, 7, 8];
+  const durationOpts = [5, 6, 7, 8, 9, 10, 11, 12, 13];
 
   // 기본 드롭다운 채우기
   const defStartSel = document.getElementById('defaultStartTime');
@@ -457,7 +506,7 @@
     const o = document.createElement('option'); o.value = String(v); o.textContent = `${v}시간`;
     defDurSel.appendChild(o);
   });
-  defDurSel.value = '3';
+  defDurSel.value = '8';
 
   // ─── schedule 데이터 ───
   // [{ date: 'YYYY-MM-DD', startTime: '10:00', duration: 3 }]
@@ -592,6 +641,7 @@
     locale: 'ko',
     dateFormat: 'Y-m-d',
     minDate: 'today',
+    defaultDate: [],
     onChange: function(dates) {
       if (suppressCalendarChange) return; // 우리가 setDate로 sync 중이면 무시
 
