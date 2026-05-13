@@ -63,14 +63,6 @@
   }
   .kakao-badge::before { content: ''; width: 6px; height: 6px; background: #3c1e1e; border-radius: 50%; }
 
-  .prefill-notice {
-    display: none; align-items: center; justify-content: space-between; gap: 8px;
-    background: #fffbeb; color: #92400e; border: 1px solid #fde68a;
-    border-radius: var(--radius-sm); padding: 10px 14px;
-    font-size: 13px; margin-bottom: 16px;
-  }
-  .prefill-notice.show { display: flex; }
-
   /* 저장된 업체 선택 */
   .saved-biz {
     display: none;
@@ -389,9 +381,6 @@
     <div id="kakaoBadge" class="kakao-badge" style="display:none;">카카오톡 연결됨</div>
   </header>
 
-  <div id="prefillNotice" class="prefill-notice">
-    <span>💾 이전에 입력하신 정보를 불러왔습니다</span>
-  </div>
 
   <form id="bookingForm" novalidate>
 
@@ -980,8 +969,6 @@
   if (cached.sender_contact) document.querySelector('[name="sender_contact"]').value = cached.sender_contact;
   renderSavedBiz();
   const hasAnyCache = (cached.businesses || []).length > 0 || cached.sender_name;
-  if (hasAnyCache) document.getElementById('prefillNotice').classList.add('show');
-
   // ─── 카카오 ID 기반 backend history prefill (다른 기기 자동완성) ───
   // DEFAULT_API는 폼 제출 섹션에서 const로 선언되지만 hoisting 안 되므로 직접 base URL 사용
   const API_BASE_FOR_HISTORY = 'https://reached-thunder-events-heading.trycloudflare.com';
@@ -1035,7 +1022,6 @@
         local.businesses = local.businesses.slice(0, MAX_BUSINESSES);
         _writeCached(local);
         renderSavedBiz();
-        document.getElementById('prefillNotice').classList.add('show');
       }
     } catch (e) { /* 네트워크 실패 무시, localStorage로만 동작 */ }
   }
@@ -1177,7 +1163,6 @@
           <p style="margin-top:12px;">${json.message || '매니저 매칭 후 안내드리겠습니다.'}</p>
         `;
         form.style.display = 'none';
-        document.getElementById('prefillNotice').classList.remove('show');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         throw new Error(json.message || 'submit failed');
