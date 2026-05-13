@@ -1038,12 +1038,28 @@
     delBtn.disabled = false;
   });
 
-  document.getElementById('btnDeleteBiz').addEventListener('click', () => {
+  const HIDE_API = 'https://kpofzqkihyzuuiaiuofi.supabase.co/functions/v1/booking-hide';
+  document.getElementById('btnDeleteBiz').addEventListener('click', async () => {
     const id = document.getElementById('savedBizSelect').value;
     if (!id) return;
     const b = (loadCached().businesses || []).find(x => x.id === id);
     if (!b) return;
     if (!confirm(`'${b.business_name}' 업체 정보를 삭제할까요?`)) return;
+    // 카카오 계정 사용자는 backend에도 hide 기록 → 다른 기기/새로고침에서도 안 보임
+    if (kakaoKey) {
+      try {
+        await fetch(HIDE_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sender_kakao_id: kakaoKey,
+            business_name: b.business_name,
+            address_road: b.address_road || null,
+            address: b.address || null,
+          }),
+        });
+      } catch (e) { console.warn('[hide] backend 실패, localStorage만 삭제:', e); }
+    }
     deleteBusiness(id);
     renderSavedBiz();
   });
