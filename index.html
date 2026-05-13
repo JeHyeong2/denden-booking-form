@@ -106,11 +106,6 @@
     border-color: var(--red); color: var(--red); background: var(--red-light);
   }
   .saved-biz-delete:disabled { opacity: 0.4; cursor: not-allowed; }
-  .prefill-notice button {
-    background: transparent; border: 0; color: #92400e;
-    font-size: 12px; font-weight: 700; cursor: pointer;
-    text-decoration: underline; padding: 0;
-  }
 
   .card {
     background: #fff; border-radius: var(--radius);
@@ -396,7 +391,6 @@
 
   <div id="prefillNotice" class="prefill-notice">
     <span>💾 이전에 입력하신 정보를 불러왔습니다</span>
-    <button type="button" id="btnClearPrefill">초기화</button>
   </div>
 
   <form id="bookingForm" novalidate>
@@ -621,7 +615,7 @@
                   schedule: JSON.parse(obj.schedule || '[]')
                 };
                 if (obj.sender_kakao_id) payload.sender_kakao_id = obj.sender_kakao_id;
-                var API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
+                var API = 'https://reached-thunder-events-heading.trycloudflare.com/webhook/web-form-booking';
                 b.disabled = true; b.textContent = '접수 중...';
                 var r = await fetch(API, {
                   method: 'POST',
@@ -730,10 +724,6 @@
     const cached = loadCached();
     cached.businesses = (cached.businesses || []).filter(b => b.id !== id);
     _writeCached(cached);
-  }
-
-  function clearCached() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }
 
   // ─── 시간 옵션 ───
@@ -994,7 +984,7 @@
 
   // ─── 카카오 ID 기반 backend history prefill (다른 기기 자동완성) ───
   // DEFAULT_API는 폼 제출 섹션에서 const로 선언되지만 hoisting 안 되므로 직접 base URL 사용
-  const API_BASE_FOR_HISTORY = 'https://plants-believes-kent-cruises.trycloudflare.com';
+  const API_BASE_FOR_HISTORY = 'https://reached-thunder-events-heading.trycloudflare.com';
   const HISTORY_API = (params.get('historyApi')) || (API_BASE_FOR_HISTORY + '/webhook/booking-history');
   async function fetchAndMergeHistory() {
     if (!kakaoKey) { console.log('[history] no kakao key in URL'); return; }
@@ -1074,12 +1064,6 @@
     renderSavedBiz();
   });
 
-  document.getElementById('btnClearPrefill').addEventListener('click', () => {
-    if (!confirm('저장된 모든 업체와 신청자 정보를 지울까요?')) return;
-    clearCached();
-    location.reload();
-  });
-
   // ─── 약관 체크 → 신청하기 버튼 시각적 lock 토글 ───
   // (disabled 속성 대신 CSS class — 일부 모바일 인앱이 disabled 토글을 무시하는 케이스 회피)
   // 실 차단은 form submit handler에서 e.preventDefault()로 보장
@@ -1109,7 +1093,7 @@
   console.log('[consent] init checked=', consentEl.checked, 'locked=', submitBtnEl.classList.contains('is-locked'));
 
   // ─── 폼 제출 ───
-  const DEFAULT_API = 'https://plants-believes-kent-cruises.trycloudflare.com/webhook/web-form-booking';
+  const DEFAULT_API = 'https://reached-thunder-events-heading.trycloudflare.com/webhook/web-form-booking';
   const apiUrl = params.get('api') || (
     location.hostname === 'localhost' ? location.origin + '/webhook/web-form-booking' : DEFAULT_API
   );
