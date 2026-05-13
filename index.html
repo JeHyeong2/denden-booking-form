@@ -604,7 +604,7 @@
                   schedule: JSON.parse(obj.schedule || '[]')
                 };
                 if (obj.sender_kakao_id) payload.sender_kakao_id = obj.sender_kakao_id;
-                var API = 'https://reached-thunder-events-heading.trycloudflare.com/webhook/web-form-booking';
+                var API = 'https://kpofzqkihyzuuiaiuofi.supabase.co/functions/v1/booking-submit';
                 b.disabled = true; b.textContent = '접수 중...';
                 var r = await fetch(API, {
                   method: 'POST',
@@ -970,9 +970,7 @@
   renderSavedBiz();
   const hasAnyCache = (cached.businesses || []).length > 0 || cached.sender_name;
   // ─── 카카오 ID 기반 backend history prefill (다른 기기 자동완성) ───
-  // DEFAULT_API는 폼 제출 섹션에서 const로 선언되지만 hoisting 안 되므로 직접 base URL 사용
-  const API_BASE_FOR_HISTORY = 'https://reached-thunder-events-heading.trycloudflare.com';
-  const HISTORY_API = (params.get('historyApi')) || (API_BASE_FOR_HISTORY + '/webhook/booking-history');
+  const HISTORY_API = (params.get('historyApi')) || 'https://kpofzqkihyzuuiaiuofi.supabase.co/functions/v1/booking-history';
   async function fetchAndMergeHistory() {
     if (!kakaoKey) { console.log('[history] no kakao key in URL'); return; }
     console.log('[history] fetching', HISTORY_API, 'k=', kakaoKey);
@@ -1079,10 +1077,8 @@
   console.log('[consent] init checked=', consentEl.checked, 'locked=', submitBtnEl.classList.contains('is-locked'));
 
   // ─── 폼 제출 ───
-  const DEFAULT_API = 'https://reached-thunder-events-heading.trycloudflare.com/webhook/web-form-booking';
-  const apiUrl = params.get('api') || (
-    location.hostname === 'localhost' ? location.origin + '/webhook/web-form-booking' : DEFAULT_API
-  );
+  const DEFAULT_API = 'https://kpofzqkihyzuuiaiuofi.supabase.co/functions/v1/booking-submit';
+  const apiUrl = params.get('api') || DEFAULT_API;
 
   const form = document.getElementById('bookingForm');
   const btn = document.getElementById('submitBtn');
